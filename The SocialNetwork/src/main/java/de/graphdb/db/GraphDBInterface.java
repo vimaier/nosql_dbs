@@ -45,6 +45,32 @@ public interface GraphDBInterface {
   public Collection<UserDTO> findFriends(UserDTO user);
 
   /**
+   * Findet Nutzer anhand eines Suchbegriffes
+   * 
+   * @param user
+   * @return Collection<UserDTO>
+   */
+  public Collection<UserDTO> findUsers(String suchbegriff);
+
+  /**
+   * Beziehung zwischen user und friend Aufbauen
+   * 
+   * @param user
+   * @param friend
+   * @return
+   */
+  public boolean makeFriends(UserDTO user, UserDTO friend);
+
+  /**
+   * Beziehung zwischen user und friend beenden
+   * 
+   * @param user
+   * @param friend
+   * @return
+   */
+  public boolean unfriend(UserDTO user, UserDTO friend);
+
+  /**
    * Gibt Freunde von Freunden zurück - Eventuell auf 10 oder 20 limitieren.
    * 
    * @param friends
@@ -52,5 +78,14 @@ public interface GraphDBInterface {
    * @return Collection<UserDTO>
    */
   public Collection<UserDTO> findFriendsOfFriends(Collection<UserDTO> friends);
+
+  /**
+   * Gibt Verwandte zurück - Eventuell auf 10 oder 20 limitieren.
+   * 
+   * @param user
+   *          UserDTO
+   * @return Collection<UserDTO>
+   */
+  public Collection<UserDTO> findRelative(UserDTO user);
 
 }
