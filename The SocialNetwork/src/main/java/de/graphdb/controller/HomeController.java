@@ -23,38 +23,36 @@ import de.graphdb.dto.UserDTO;
  */
 @Controller
 @RequestMapping(value = "/")
-@SessionAttributes({"UserDTO", "LoginDTO"})
+@SessionAttributes({ "UserDTO", "LoginDTO" })
 public class HomeController {
-	
+
   @Autowired
   private WebRequest request;
-	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
-	private ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
+  private static final Logger logger = LoggerFactory
+      .getLogger(HomeController.class);
+  private ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
       "spring.xml");
-	
-	@ModelAttribute("LoginDTO")
+
+  @ModelAttribute("LoginDTO")
   public LoginDTO createLoginDTO() {
     return (LoginDTO) context.getBean("LoginDTO");
   }
-	
-	@ModelAttribute("UserDTO")
+
+  @ModelAttribute("UserDTO")
   public UserDTO createUserDTO() {
     return (UserDTO) context.getBean("UserDTO");
   }
-	
-	@RequestMapping(method = RequestMethod.GET)
-	public String home(ModelMap model) {
-		logger.info("Welcome home! The client locale is {}.");
-		
-		
-		
-		model.put("UserDTO", createUserDTO());
-		return "index";
-	}
-	
-	
-	
-	/**
+
+  @RequestMapping(method = RequestMethod.GET)
+  public String home(ModelMap model) {
+    logger.info("Welcome home! The client locale is {}.");
+
+    model.put("UserDTO", createUserDTO());
+    model.put("LoginDTO", createLoginDTO());
+    return "index";
+  }
+
+  /**
    * Catch InvalidPropertyException if Session timeout
    * 
    * @param exception
@@ -83,5 +81,5 @@ public class HomeController {
     logger.info("Exception: " + exception);
     return "redirect:Login.do";
   }
-	
+
 }

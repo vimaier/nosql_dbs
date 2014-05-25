@@ -5,15 +5,25 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class LoginDTO {
 
-  private String email;
+  private String mailadress;
   private String password;
 
-  public String getEmail() {
-    return email;
+  public LoginDTO() {
+
   }
 
-  public void setEmail(String email) {
-    this.email = email;
+  public LoginDTO(String mailadress, String password) {
+    super();
+    this.mailadress = mailadress;
+    this.password = password;
+  }
+
+  public String getMailadress() {
+    return mailadress;
+  }
+
+  public void setMailadress(String mailadress) {
+    this.mailadress = mailadress;
   }
 
   public String getPassword() {
@@ -24,19 +34,10 @@ public class LoginDTO {
     this.password = password;
   }
 
-  public LoginDTO() {
-
-  }
-
-  public LoginDTO(String email, String password) {
-    super();
-    this.email = email;
-    this.password = password;
-  }
-
   @Override
   public String toString() {
-    return "LoginDTO [email=" + email + ", password=" + password + "]";
+    return "LoginDTO [mailadress=" + mailadress + ", password=" + password
+        + "]";
   }
 
 }

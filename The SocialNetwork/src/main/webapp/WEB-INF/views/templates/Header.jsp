@@ -5,23 +5,14 @@
       <div class="logo">
         <h1><a href="#"><fmt:message key="website.title2"/></a></h1>
       </div>
-        <!-- registerform -->
-      	<div id="loginfade">
-   				<p>
-        		<a href="#" id="loginclose">close</a>
-   				</p>
-    			<sf:form action="Register.do" commandName="UserDTO">
-    			  <sf:label path="forname">forname</sf:label><sf:input path="forname" />
-    				<sf:label path="surname">surname</sf:label><sf:input path="surname" />
-    				<sf:label path="mailadress">mailadress</sf:label><sf:input path="mailadress" />
-    				<sf:label path="street">street</sf:label><sf:input path="street" />
-    				<sf:label path="housenumber">housenumber</sf:label><sf:input path="housenumber" />
-    				<sf:label path="postcode">postcode</sf:label><sf:input path="postcode" />
-    				<sf:label path="city">city</sf:label><sf:input path="city" />
-    				<sf:button>submit</sf:button>
-    			</sf:form>
-				</div>
-				<!-- /registerform -->
+      <c:choose>
+	      <c:when test="${not empty usersession}">
+        	<%@ include file="RegisterLoginForm.jsp"%>
+        </c:when>
+        <c:otherwise>
+        	<%@ include file="RegisterLoginForm.jsp"%>
+        </c:otherwise>
+      </c:choose>
 			<div id="overlay"></div>
 			<!--searchform -->                
       <div class="search">      
@@ -35,12 +26,20 @@
         <div class="clr"></div>
       </div>
       <!-- buttons_login_register -->
-      <div class="login">
-        <form method="get" id="search12" action="#"> 
-          <input type="button" id="loginopen" class="rm fl button_grey" value="<fmt:message key="menu.login"/>" />
-      	  <input type="button" class="rm fr button_blue" value="<fmt:message key="menu.create"/>" />
-      	</form>
-      </div> 
+      <c:choose>
+	      <c:when test="${not empty usersession}">
+		      <div class="login">
+		        <input type="button" id="registeropen" class="rm fl button_grey" value="<fmt:message key="menu.login"/>" />
+		      	<input type="button" id="loginopen" class="rm fr button_blue" value="<fmt:message key="menu.create"/>" />
+		      </div> 
+	      </c:when>
+	      <c:otherwise>
+	      	<div class="login">
+		        <input type="button" id="registeropen" class="rm fl button_grey" value="<fmt:message key="menu.login"/>" />
+		      	<input type="button" id="loginopen"class="rm fr button_blue" value="<fmt:message key="menu.create"/>" />
+		      </div>
+	      </c:otherwise>
+      </c:choose>
       <!-- /buttons_login_register --> 
       <div class="clr"></div>
       <div class="menu_nav">

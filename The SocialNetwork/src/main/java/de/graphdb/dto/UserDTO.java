@@ -13,10 +13,19 @@ public class UserDTO {
   private String housenumber;
   private String postcode;
   private String city;
+  private String password;
   private CommonsMultipartFile picture_up;
 
   public String getForname() {
     return forname;
+  }
+
+  public String getPassword() {
+    return password;
+  }
+
+  public void setPassword(String password) {
+    this.password = password;
   }
 
   public void setForname(String forname) {
@@ -85,7 +94,7 @@ public class UserDTO {
 
   public UserDTO(String forname, String surname, String mailadress,
       String street, String housenumber, String postcode, String city,
-      CommonsMultipartFile picture_up) {
+      String password, CommonsMultipartFile picture_up) {
     super();
     this.forname = forname;
     this.surname = surname;
@@ -94,6 +103,7 @@ public class UserDTO {
     this.housenumber = housenumber;
     this.postcode = postcode;
     this.city = city;
+    this.password = password;
     this.picture_up = picture_up;
   }
 
