@@ -32,6 +32,7 @@ public class Neo4jDao implements GraphDBInterface {
 						                 .post(ClientResponse.class);
 			String erg = respo.getEntity(String.class).toString(); //.getBytes("UTF8");
 			System.out.println(erg);
+			
 			respo.close();
 			return true;
 		}
