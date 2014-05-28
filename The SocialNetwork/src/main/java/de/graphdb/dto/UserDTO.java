@@ -115,4 +115,22 @@ public class UserDTO {
         + city + ", picture_up=" + picture_up + "]";
   }
 
+  public String getInsertCypherQuery(){
+	  String label = "User";
+	  
+	  StringBuilder sb = new StringBuilder();
+	  sb.append("{ \"query\" : \"create (u:"+label+"{");
+	  sb.append("forname: '"+this.forname+"',");
+	  sb.append("surname: '"+this.surname+"',");
+	  sb.append("mailadress: '"+this.mailadress+"',");
+	  sb.append("street: '"+this.street+"',");
+	  sb.append("housenumber: '"+ this.housenumber+"',");
+	  sb.append("postcode: '"+this.postcode+"',");
+	  sb.append("city: '"+this.city+"',");
+	  sb.append("password: '"+this.password+"'");
+	  sb.append(" }) return u\" }");
+	  
+	  return sb.toString();
+  }
+  
 }
