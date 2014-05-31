@@ -10,6 +10,7 @@ import com.sun.jersey.api.client.WebResource;
 
 import de.graphdb.db.GraphDBInterface;
 import de.graphdb.dto.UserDTO;
+import de.graphdb.service.ParseJSON;
 
 public class Neo4jDao implements GraphDBInterface {
 	
@@ -17,9 +18,8 @@ public class Neo4jDao implements GraphDBInterface {
 
 	@Override
 	public boolean insertUser(UserDTO user) {
-		// TODO Auto-generated method stub
 		String cypherjsonquery = user.getInsertCypherQuery();
-		
+
 		System.out.println("Query: "+cypherjsonquery);
 		
 		ClientResponse respo=null;
@@ -44,20 +44,86 @@ public class Neo4jDao implements GraphDBInterface {
 
 	@Override
 	public UserDTO updateUser(UserDTO user) {
-		// TODO Auto-generated method stub
-		return null;
+		String cypherjsonquery = user.getUpdateCypherQuery();
+		
+		System.out.println("Query: "+cypherjsonquery);
+		
+		ClientResponse respo=null;
+		try {
+			final String nodeEntryPointURI = SERVER_ROOT_URI + "cypher";
+			WebResource res = Client.create().resource(nodeEntryPointURI);
+			respo = res.accept(MediaType.APPLICATION_JSON)
+						                 .type(MediaType.APPLICATION_JSON)
+						                 .entity(cypherjsonquery)
+						                 .post(ClientResponse.class);
+			String erg = respo.getEntity(String.class).toString(); //.getBytes("UTF8");
+			System.out.println(erg);
+			
+			respo.close();
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		
+		return user;
 	}
 
 	@Override
 	public boolean deleteUser(UserDTO user) {
-		// TODO Auto-generated method stub
-		return false;
+		String cypherjsonquery = user.getDeleteCypherQuery();
+
+		System.out.println("Query: "+cypherjsonquery);
+		
+		ClientResponse respo=null;
+		try {
+			final String nodeEntryPointURI = SERVER_ROOT_URI + "cypher";
+			WebResource res = Client.create().resource(nodeEntryPointURI);
+			respo = res.accept(MediaType.APPLICATION_JSON)
+						                 .type(MediaType.APPLICATION_JSON)
+						                 .entity(cypherjsonquery)
+						                 .post(ClientResponse.class);
+			String erg = respo.getEntity(String.class).toString(); //.getBytes("UTF8");
+			System.out.println(erg);
+			
+			respo.close();
+			return true;
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	@Override
 	public Collection<UserDTO> findFriends(UserDTO user) {
-		// TODO Auto-generated method stub
-		return null;
+		Collection<UserDTO> friends = null;
+		
+		String cypherjsonquery = user.getFriendsCypherQuery();
+
+		System.out.println("Query: "+cypherjsonquery);
+		
+		ClientResponse respo=null;
+		try {
+			final String nodeEntryPointURI = SERVER_ROOT_URI + "cypher";
+			WebResource res = Client.create().resource(nodeEntryPointURI);
+			respo = res.accept(MediaType.APPLICATION_JSON)
+						                 .type(MediaType.APPLICATION_JSON)
+						                 .entity(cypherjsonquery)
+						                 .post(ClientResponse.class);
+			String erg = respo.getEntity(String.class).toString(); //.getBytes("UTF8");
+			System.err.println("sfdsdf");
+			System.out.println(erg);
+			
+			respo.close();
+			
+			friends = ParseJSON.parseString(erg);	
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		return friends;
 	}
 
 	@Override
@@ -68,8 +134,28 @@ public class Neo4jDao implements GraphDBInterface {
 
 	@Override
 	public boolean makeFriends(UserDTO user, UserDTO friend) {
-		// TODO Auto-generated method stub
-		return false;
+		String cypherjsonquery = user.getMakeFriendsCypherQuery(friend);
+
+		System.out.println("Query: "+cypherjsonquery);
+		
+		ClientResponse respo=null;
+		try {
+			final String nodeEntryPointURI = SERVER_ROOT_URI + "cypher";
+			WebResource res = Client.create().resource(nodeEntryPointURI);
+			respo = res.accept(MediaType.APPLICATION_JSON)
+						                 .type(MediaType.APPLICATION_JSON)
+						                 .entity(cypherjsonquery)
+						                 .post(ClientResponse.class);
+			String erg = respo.getEntity(String.class).toString(); //.getBytes("UTF8");
+			System.out.println(erg);
+			
+			respo.close();
+			return true;
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	@Override
