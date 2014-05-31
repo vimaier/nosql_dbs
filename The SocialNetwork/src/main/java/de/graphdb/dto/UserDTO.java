@@ -121,12 +121,117 @@ public class UserDTO {
 	}
 
 	public String getInsertCypherQuery() {
+		if (this.mailadress == null)
+			return null;
+
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("{ \"query\" : \"create (u:" + LABEL + "{");
+		if (this.forname != null)
+			sb.append("forname: '" + this.forname + "',");
+		if (this.surname != null)
+			sb.append("surname: '" + this.surname + "',");
+		if (this.mailadress != null)
+			sb.append("mailadress: '" + this.mailadress + "',");
+		if (this.street != null)
+			sb.append("street: '" + this.street + "',");
+		if (this.housenumber != null)
+			sb.append("housenumber: '" + this.housenumber + "',");
+		if (this.postcode != null)
+			sb.append("postcode: '" + this.postcode + "',");
+		if (this.city != null)
+			sb.append("city: '" + this.city + "',");
+		if (this.password != null)
+			sb.append("password: '" + this.password + "',");
+		sb.deleteCharAt(sb.length() - 1);
+		sb.append(" }) return u\" }");
+
+		return sb.toString();
+	}
+
+	public String getUpdateCypherQuery() {
+		if (this.mailadress == null)
+			return null;
+
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("{ \"query\" : \"match (u:" + LABEL + ") ");
+		sb.append("where u.mailadress = '" + this.mailadress + "' ");
+		if (this.forname != null)
+			sb.append("set u.forname = '" + this.forname + "',");
+		if (this.surname != null)
+			sb.append("u.surname = '" + this.surname + "',");
+		if (this.street != null)
+			sb.append("u.street = '" + this.street + "',");
+		if (this.housenumber != null)
+			sb.append("u.housenumber = '" + this.housenumber + "',");
+		if (this.postcode != null)
+			sb.append("u.postcode = '" + this.postcode + "',");
+		if (this.city != null)
+			sb.append("u.city = '" + this.city + "',");
+		if (this.password != null)
+			sb.append("u.password = '" + this.password + "',");
+		sb.deleteCharAt(sb.length() - 1);
+		sb.append(" return u\" }");
+
+		return sb.toString();
+	}
+
+	public String getDeleteCypherQuery() {
+		if (this.mailadress == null)
+			return null;
+
+		StringBuilder sb = new StringBuilder();
+
+		// TODO: relationen noch lï¿½schen!!
+		// sb.append("{ \"query\" : \"match (u:" + LABEL + ")-[r]-() ");
+		sb.append("{ \"query\" : \"match (u:" + LABEL + ") ");
+		sb.append("where u.mailadress = '" + this.mailadress + "' ");
+		// sb.append("delete u, r\" }");
+		sb.append("delete u\" }");
+
+		return sb.toString();
+	}
+
+	public String getMakeFriendsCypherQuery(UserDTO friend) {
+		if (this.mailadress == null || friend.mailadress == null)
+			return null;
+
+		StringBuilder sb = new StringBuilder();
+
+		String since = Calendar.getInstance().getTime().toString();
+
+		sb.append("{ \"query\" : \"match (u:" + LABEL + "),(f:" + LABEL + ") ");
+		sb.append("where u.mailadress = '" + this.mailadress
+				+ "' and f.mailadress = '" + friend.mailadress + "' ");
+		sb.append("create (u)-[r:" + RELATIONSHIP_FRIENDS + " {since: '"
+				+ since + "'}]->(f)\" }");
+
+		return sb.toString();
+	}
+
+	public String getFriendsCypherQuery() {
+		if (this.mailadress == null)
+			return null;
+
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("{ \"query\" : \"match (u:" + LABEL + ")-[:"
+				+ RELATIONSHIP_FRIENDS + "]->(f:" + LABEL + ") ");
+		sb.append("where u.mailadress = '" + this.mailadress + "' ");
+		sb.append("return f\" }");
+
+		return sb.toString();
+	}
+
+	public String getInsertGremlinQuery() {
 		if(this.mailadress == null)
 			return null;
 		
 		StringBuilder sb = new StringBuilder();
-
-		sb.append("{ \"query\" : \"create (u:" + LABEL + "{");
+		
+		// beginn
+		sb.append("g.addVertex([");
 		if(this.forname != null)
 			sb.append("forname: '" + this.forname + "',");
 		if(this.surname != null)
@@ -134,89 +239,19 @@ public class UserDTO {
 		if(this.mailadress != null)
 			sb.append("mailadress: '" + this.mailadress + "',");
 		if(this.street != null)
-			sb.append("street: '" + this.street + "',");
+			sb.append("street: '" + this.street + "',");	
 		if(this.housenumber != null)
-			sb.append("housenumber: '" + this.housenumber + "',");
+			sb.append("housenumber: '" + this.housenumber + "',");	
 		if(this.postcode != null)
-			sb.append("postcode: '" + this.postcode + "',");
+			sb.append("postcode: '" + this.postcode + "',");	
 		if(this.city != null)
-			sb.append("city: '" + this.city + "',");
+			sb.append("city: '" + this.city + "',");	
 		if(this.password != null)
 			sb.append("password: '" + this.password + "',");
-		sb.deleteCharAt(sb.length()-1);
-		sb.append(" }) return u\" }");
-
-		return sb.toString();
-	}
-
-	public String getUpdateCypherQuery() {
-		if(this.mailadress == null)
-			return null;
-		
-		StringBuilder sb = new StringBuilder();
-		
-		sb.append("{ \"query\" : \"match (u:" + LABEL + ") ");
-		sb.append("where u.mailadress = '" + this.mailadress + "' ");
-		if(this.forname != null)
-			sb.append("set u.forname = '" + this.forname + "',");
-		if(this.surname != null)
-			sb.append("u.surname = '" + this.surname + "',");
-		if(this.street != null)
-			sb.append("u.street = '" + this.street + "',");
-		if(this.housenumber != null)
-			sb.append("u.housenumber = '" + this.housenumber + "',");
-		if(this.postcode != null)
-			sb.append("u.postcode = '" + this.postcode + "',");
-		if(this.city != null)
-			sb.append("u.city = '" + this.city + "',");
-		if(this.password != null)
-			sb.append("u.password = '" + this.password + "',");
-		sb.deleteCharAt(sb.length()-1);
-		sb.append(" return u\" }");
-		
-		return sb.toString();
-	}
-	
-	public String getDeleteCypherQuery(){
-		if(this.mailadress == null)
-			return null;
-		
-		StringBuilder sb = new StringBuilder();
-		
-		// TODO: relationen noch löschen!!
-		//sb.append("{ \"query\" : \"match (u:" + LABEL + ")-[r]-() ");
-		sb.append("{ \"query\" : \"match (u:" + LABEL + ") ");
-		sb.append("where u.mailadress = '"+this.mailadress+"' ");
-		//sb.append("delete u, r\" }");
-		sb.append("delete u\" }");
-		
-		return sb.toString();
-	}
-	
-	public String getMakeFriendsCypherQuery(UserDTO friend){
-		if(this.mailadress == null || friend.mailadress == null)
-			return null;
-		
-		StringBuilder sb = new StringBuilder();
-		
-		String since = Calendar.getInstance().getTime().toString();
-		
-		sb.append("{ \"query\" : \"match (u:" + LABEL + "),(f:"+LABEL+") ");
-		sb.append("where u.mailadress = '"+this.mailadress+"' and f.mailadress = '"+friend.mailadress+"' ");
-		sb.append("create (u)-[r:"+RELATIONSHIP_FRIENDS+" {since: '"+since+"'}]->(f)\" }");
-		
-		return sb.toString();
-	}
-
-	public String getFriendsCypherQuery(){
-		if(this.mailadress == null)
-			return null;
-		
-		StringBuilder sb = new StringBuilder();
-
-		sb.append("{ \"query\" : \"match (u:" + LABEL + ")-[:"+RELATIONSHIP_FRIENDS+"]->(f:" + LABEL + ") ");
-		sb.append("where u.mailadress = '"+this.mailadress+"' ");
-		sb.append("return f\" }");
+		// entferne letztes komma
+		sb.deleteCharAt(sb.length() - 1);
+		// ende
+		sb.append("])");
 		
 		return sb.toString();
 	}
