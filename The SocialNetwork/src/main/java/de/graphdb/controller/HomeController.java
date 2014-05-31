@@ -46,7 +46,7 @@ public class HomeController {
   @RequestMapping(method = RequestMethod.GET)
   public String home(ModelMap model) {
     logger.info("Welcome home! The client locale is {}.");
-
+    
     model.put("UserDTO", createUserDTO());
     model.put("LoginDTO", createLoginDTO());
     return "index";
