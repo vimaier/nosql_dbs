@@ -71,7 +71,7 @@ public interface GraphDBInterface {
   public boolean unfriend(UserDTO user, UserDTO friend);
 
   /**
-   * Gibt Freunde von Freunden zurück - Eventuell auf 10 oder 20 limitieren.
+   * Gibt Freunde von Freunden zurueck - Eventuell auf 10 oder 20 limitieren.
    * 
    * @param friends
    *          Collection<UserDTO>
@@ -80,7 +80,7 @@ public interface GraphDBInterface {
   public Collection<UserDTO> findFriendsOfFriends(Collection<UserDTO> friends);
 
   /**
-   * Gibt Verwandte zurück - Eventuell auf 10 oder 20 limitieren.
+   * Gibt Verwandte zurueck - Eventuell auf 10 oder 20 limitieren.
    * 
    * @param user
    *          UserDTO
