@@ -1,18 +1,36 @@
 package de.graphdb.db.neo4j;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
 
+import org.neo4j.graphdb.Node;
+import org.neo4j.helpers.collection.IteratorUtil;
+import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.rest.graphdb.RestAPI;
 import org.neo4j.rest.graphdb.RestGraphDatabase;
 import org.neo4j.rest.graphdb.query.QueryEngine;
 import org.neo4j.rest.graphdb.query.RestCypherQueryEngine;
+import org.neo4j.rest.graphdb.util.QueryResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.graphdb.db.GraphDBInterface;
+import de.graphdb.db.orientdb.OrientDbConnectionTest;
 import de.graphdb.dto.UserDTO;
 
+/*
+ * Some good examples...
+ * https://github.com/neo4j/java-rest-binding/blob/1590210bf1097411d208fa977f83a60a5677c277/src/test/java/org/neo4j/rest/graphdb/RestCypherQueryEngineTest.java
+ * 
+ */
 public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 
 	private static final String SERVER_ROOT_URI = "http://localhost:7474/db/data/";
+	
+	
+	private Logger log = LoggerFactory.getLogger(Neo4jDaoWithWrappedRest.class);
 	
 	private final boolean LAZY_INIT = true;
 	private RestGraphDatabase restGraphDatabase;
@@ -62,8 +80,19 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 
 	@Override
 	public boolean insertUser(UserDTO user) {
-		// TODO Auto-generated method stub
-		return false;
+		try{
+			
+			String statement = getInsertCypherQuery(user);
+			getQueryEngine().query(statement, null);
+		}catch(Exception exc) {
+			log.error(
+					String.format("Could not insert user:'%s' Exception: %s", 
+							user.toString(), exc.toString()) 
+					 );
+			return false;
+		}
+		//TODO: Maybe we should insert the ID for the inserted user? (vimaier)
+		return true;
 	}
 
 	@Override
@@ -85,9 +114,20 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 	}
 
 	@Override
+	/**
+	 * @param suchbegriff Should be mailadress since it is a unique ID
+	 */
 	public Collection<UserDTO> findUsers(String suchbegriff) {
-		// TODO Auto-generated method stub
-		return null;
+		final String mailaddress = suchbegriff;
+		final String queryString = "match (n) where n.mailaddress = {ref_mailaddress} return n";
+        final Iterator resultIter = queryEngine.query(queryString, MapUtil.map("ref_mailaddress", mailaddress)).to(Node.class).iterator();
+        
+        Collection<UserDTO> foundUsers = new ArrayList<UserDTO>();
+        while(resultIter.hasNext()) {
+        	Node node = (Node) resultIter.next();
+        	foundUsers.add(createUserFromNode(node));
+        }
+        return foundUsers;
 	}
 
 	@Override
@@ -113,5 +153,51 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	
+	public String getInsertCypherQuery(UserDTO u) {
+		if (u.getMailadress() == null)
+			return null;
 
+		StringBuilder sb = new StringBuilder();
+		
+		//TODO: We should switch from hardcoded strings to variables (vimaier)
+		sb.append("create (u:" + UserDTO.LABEL + "{");
+		if (u.getForename() != null)
+			sb.append("forename: '" + u.getForename() + "',");
+		if (u.getSurname() != null)
+			sb.append("surname: '" + u.getSurname() + "',");
+		if (u.getMailadress() != null)
+			sb.append("mailaddress: '" + u.getMailadress() + "',");
+		if (u.getStreet() != null)
+			sb.append("street: '" + u.getStreet() + "',");
+		if (u.getHousenumber() != null)
+			sb.append("housenumber: '" + u.getHousenumber() + "',");
+		if (u.getPostcode() != null)
+			sb.append("postcode: '" + u.getPostcode() + "',");
+		if (u.getCity() != null)
+			sb.append("city: '" + u.getCity() + "',");
+		if (u.getPassword() != null)
+			sb.append("password: '" + u.getPassword() + "',");
+		sb.deleteCharAt(sb.length() - 1);
+		sb.append(" }) return u");
+
+		return sb.toString();
+	}
+	
+
+	private UserDTO createUserFromNode(Node node) {
+		return new UserDTO( (String) node.getProperty("forename", ""), 
+				(String) node.getProperty("surname", ""), 
+				(String) node.getProperty("mailaddress", ""), 
+				(String) node.getProperty("street", ""), 
+				(String) node.getProperty("housenumber", ""), 
+				(String) node.getProperty("postcode", ""), 
+				(String) node.getProperty("city", ""), 
+				(String) node.getProperty("password", ""), 
+				null // We did not load the picture here (vimaier)
+				);
+	}
 }
+
+

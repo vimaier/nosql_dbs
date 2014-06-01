@@ -8,8 +8,8 @@ import org.springframework.web.multipart.commons.CommonsMultipartFile;
 @Repository
 public class UserDTO {
 
-	private static final String LABEL = "USER";
-	private static final String RELATIONSHIP_FRIENDS = "FRIENDS";
+	public static final String LABEL = "USER";
+	public static final String RELATIONSHIP_FRIENDS = "FRIENDS";
 
 	private String id;
 	private String forename;

@@ -33,7 +33,7 @@ public class Neo4jDaoWithRestWrapperTest {
 		UserDTO userDTO = new UserDTO();
 		userDTO.setForename("a_forename");
 		userDTO.setSurname("a_surname");
-		userDTO.setMailadress("a_mailadress");
+		userDTO.setMailadress("a_mailaddress");
 		userDTO.setStreet("a_street");
 		userDTO.setHousenumber("a_housenumber");
 		userDTO.setPostcode("a_postcode");
@@ -42,9 +42,12 @@ public class Neo4jDaoWithRestWrapperTest {
 		
 		neo4jDao.insertUser(userDTO);
 		
-		Collection<UserDTO> foundUsers = neo4jDao.findUsers("a_mailadress");
-		if(1 != foundUsers.size()) {
+		Collection<UserDTO> foundUsers = neo4jDao.findUsers("a_mailaddress");
+		if(1 < foundUsers.size()) {
 			fail("Found more than one user for 'a_mailadress'");
+		}
+		if(0 == foundUsers.size()) {
+			fail("Could not find created user");
 		}
 		UserDTO userInDb = foundUsers.iterator().next();
 		if( ! userInDb.areAttributesEqual(userDTO)){
