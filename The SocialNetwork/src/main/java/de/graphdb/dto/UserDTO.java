@@ -266,4 +266,23 @@ public class UserDTO {
 	{
 		this.id = id;
 	}
+
+	/**
+	 * Compares all attributes except of id and picture_up
+	 */
+	public boolean areAttributesEqual(UserDTO other) {
+		if(null == other)
+			return false;
+		if(this == other)
+			return true;
+		return mailadress.equals(other.getMailadress()) &&
+				forename.equals(other.getForename()) &&
+				surname.equals(other.getSurname()) &&
+				street.equals(other.getStreet()) &&
+				housenumber.equals(other.getHousenumber()) &&
+				postcode.equals(other.getPostcode()) &&
+				city.equals(other.getCity()) &&
+				password.equals(other.getPassword());
+				
+	}
 }
