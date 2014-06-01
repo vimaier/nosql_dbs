@@ -142,7 +142,15 @@
 			<artifactId>rexster-protocol</artifactId>
 			<version>2.5.0</version>
 		</dependency>
-		
+
+		<!-- OrientDb 1.7rc2 -->
+		<dependency>
+			<groupId>com.orientechnologies</groupId>
+			<artifactId>orientdb-graphdb</artifactId>
+			<version>1.7-rc2</version>
+		</dependency>
+
+
 	</dependencies>
 	<build>
 		<plugins>
