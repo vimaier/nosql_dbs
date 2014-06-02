@@ -160,8 +160,8 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 		
 		//TODO: We should switch from hardcoded strings to variables (vimaier)
 		sb.append("create (u:" + UserDTO.LABEL + "{");
-		if (u.getForname() != null)
-			sb.append("forename: '" + u.getForname() + "',");
+		if (u.getForename() != null)
+			sb.append("forename: '" + u.getForename() + "',");
 		if (u.getSurname() != null)
 			sb.append("surname: '" + u.getSurname() + "',");
 		if (u.getMailadress() != null)

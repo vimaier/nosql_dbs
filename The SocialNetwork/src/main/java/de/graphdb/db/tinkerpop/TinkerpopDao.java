@@ -87,7 +87,7 @@ public class TinkerpopDao implements GraphDBInterface {
 			connect();
 
 			List<Map<String, Object>> results = client.execute("g.addVertex(["
-					+ "forname: " + user.getForname() + ","
+					+ "forname: " + user.getForename() + ","
 					+ "surname: " + user.getSurname() + ","
 					+ "mailadress: " + user.getMailadress()	+ ","
 					+ "street: " + user.getStreet() + ","
@@ -122,8 +122,8 @@ public class TinkerpopDao implements GraphDBInterface {
 		try {
 			if(id != null)
 			{				
-				if(user.getForname() != null) 
-					client.execute("g.v(" + id + ").forname='" + user.getForname() + "'");
+				if(user.getForename() != null) 
+					client.execute("g.v(" + id + ").forname='" + user.getForename() + "'");
 				if(user.getSurname() != null)
 					client.execute("g.v(" + id + ").surname='" + user.getSurname() + "'");
 				if(user.getStreet() != null)
@@ -192,7 +192,7 @@ public class TinkerpopDao implements GraphDBInterface {
 				
 				UserDTO newUser = new UserDTO();
 				
-				newUser.setForname(currMap.get("forname").toString());
+				newUser.setForename(currMap.get("forname").toString());
 				newUser.setSurname(currMap.get("surname").toString());
 				newUser.setMailadress(currMap.get("mailadress").toString());
 				newUser.setStreet(currMap.get("street").toString());
@@ -248,7 +248,7 @@ public class TinkerpopDao implements GraphDBInterface {
 						
 						UserDTO newUser = new UserDTO();
 						
-						newUser.setForname(userDataMap.get("forname").toString());
+						newUser.setForename(userDataMap.get("forname").toString());
 						newUser.setSurname(userDataMap.get("surname").toString());
 						newUser.setMailadress(userDataMap.get("mailadress").toString());
 						newUser.setStreet(userDataMap.get("street").toString());
