@@ -17,6 +17,7 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 
 import de.graphdb.db.GraphDBInterface;
+import de.graphdb.dto.LoginDTO;
 import de.graphdb.dto.UserDTO;
 import de.graphdb.dto.UserDTO.RELATIONSHIPS;
 
@@ -46,7 +47,7 @@ public class OrientDbDao implements GraphDBInterface
 	
 	private void convertUserToVertex(Vertex v,UserDTO u)
 	{
-		v.setProperty("forename", u.getForename());
+		v.setProperty("forename", u.getForname());
 		v.setProperty("surname", u.getSurname());
 		v.setProperty("city", u.getCity());
 		v.setProperty("housenumber", u.getHousenumber());
@@ -58,7 +59,7 @@ public class OrientDbDao implements GraphDBInterface
 	
 	private void convertVertexToUser(Vertex v,UserDTO u)
 	{
-		u.setForename((String) v.getProperty("forename"));
+		u.setForname((String) v.getProperty("forename"));
 		u.setSurname((String) v.getProperty("surname"));
 		u.setCity((String) v.getProperty("city"));
 		u.setHousenumber((String) v.getProperty("housenumber"));
@@ -556,4 +557,11 @@ public class OrientDbDao implements GraphDBInterface
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+  @Override
+  public UserDTO loginUser(LoginDTO login) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
 }

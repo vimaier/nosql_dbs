@@ -3,21 +3,18 @@ package de.graphdb.db.neo4j;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
 
 import org.neo4j.graphdb.Node;
-import org.neo4j.helpers.collection.IteratorUtil;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.rest.graphdb.RestAPI;
 import org.neo4j.rest.graphdb.RestGraphDatabase;
 import org.neo4j.rest.graphdb.query.QueryEngine;
 import org.neo4j.rest.graphdb.query.RestCypherQueryEngine;
-import org.neo4j.rest.graphdb.util.QueryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.graphdb.db.GraphDBInterface;
-import de.graphdb.db.orientdb.OrientDbConnectionTest;
+import de.graphdb.dto.LoginDTO;
 import de.graphdb.dto.UserDTO;
 
 /*
@@ -163,8 +160,8 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 		
 		//TODO: We should switch from hardcoded strings to variables (vimaier)
 		sb.append("create (u:" + UserDTO.LABEL + "{");
-		if (u.getForename() != null)
-			sb.append("forename: '" + u.getForename() + "',");
+		if (u.getForname() != null)
+			sb.append("forename: '" + u.getForname() + "',");
 		if (u.getSurname() != null)
 			sb.append("surname: '" + u.getSurname() + "',");
 		if (u.getMailadress() != null)
@@ -198,6 +195,12 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 				null // We did not load the picture here (vimaier)
 				);
 	}
+
+  @Override
+  public UserDTO loginUser(LoginDTO login) {
+    // TODO Auto-generated method stub
+    return null;
+  }
 }
 
 

@@ -14,8 +14,8 @@ public class OrientDbConnection
 	private final String username = "admin";
 	private final String password = "admin";
 	private final String databaseProtocoll = "remote";
-	private final String databaseHost = "10.0.3.44";
-	private final String databaseName = "test";
+	private final String databaseHost = "localhost";//10.0.3.44";
+	private final String databaseName = "GratefulDeadConcerts";//test";
 	private final String databaseUrl = databaseProtocoll + ":" + databaseHost + "/" + databaseName;
 	
 	private enum SINGLETON

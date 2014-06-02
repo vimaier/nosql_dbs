@@ -2,6 +2,7 @@ package de.graphdb.db;
 
 import java.util.Collection;
 
+import de.graphdb.dto.LoginDTO;
 import de.graphdb.dto.UserDTO;
 
 public interface GraphDBInterface {
@@ -87,5 +88,14 @@ public interface GraphDBInterface {
    * @return Collection<UserDTO>
    */
   public Collection<UserDTO> findRelative(UserDTO user);
+  
+  /**
+   * Rueckgabe des kompletten UserDTO welches ueber die uebergebene Email(unique) gefunden wird.
+   * Abgleich von Email und Passwort uebernimmt der Controller
+   * 
+   * @param login LoginDTO
+   * @return UserDTO
+   */
+  public UserDTO loginUser(LoginDTO login);
 
 }
