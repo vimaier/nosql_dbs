@@ -9,12 +9,13 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
 import de.graphdb.db.GraphDBInterface;
+import de.graphdb.dto.LoginDTO;
 import de.graphdb.dto.UserDTO;
 import de.graphdb.service.ParseJSON;
 
 public class Neo4jDao implements GraphDBInterface {
 	
-	private static final String SERVER_ROOT_URI = "http://localhost:7474/db/data/";
+	private static final String SERVER_ROOT_URI = "http://10.0.3.43:7474/db/data/";
 
 	@Override
 	public boolean insertUser(UserDTO user) {
@@ -175,5 +176,11 @@ public class Neo4jDao implements GraphDBInterface {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+  @Override
+  public UserDTO loginUser(LoginDTO login) {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
 }

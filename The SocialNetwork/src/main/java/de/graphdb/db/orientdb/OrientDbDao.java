@@ -9,6 +9,7 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 
 import de.graphdb.db.GraphDBInterface;
+import de.graphdb.dto.LoginDTO;
 import de.graphdb.dto.UserDTO;
 
 public class OrientDbDao implements GraphDBInterface
@@ -281,5 +282,11 @@ public class OrientDbDao implements GraphDBInterface
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+  @Override
+  public UserDTO loginUser(LoginDTO login) {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
 }

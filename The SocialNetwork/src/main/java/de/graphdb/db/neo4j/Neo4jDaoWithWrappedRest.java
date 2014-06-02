@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.graphdb.db.GraphDBInterface;
+import de.graphdb.dto.LoginDTO;
 import de.graphdb.dto.UserDTO;
 
 /*
@@ -194,6 +195,12 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 				null // We did not load the picture here (vimaier)
 				);
 	}
+
+  @Override
+  public UserDTO loginUser(LoginDTO login) {
+    // TODO Auto-generated method stub
+    return null;
+  }
 }
 
 

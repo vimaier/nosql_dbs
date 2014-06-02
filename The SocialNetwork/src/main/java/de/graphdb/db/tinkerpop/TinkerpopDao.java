@@ -14,6 +14,7 @@ import com.tinkerpop.rexster.client.RexsterClient;
 import com.tinkerpop.rexster.client.RexsterClientFactory;
 
 import de.graphdb.db.GraphDBInterface;
+import de.graphdb.dto.LoginDTO;
 import de.graphdb.dto.UserDTO;
 
 public class TinkerpopDao implements GraphDBInterface {
@@ -364,4 +365,10 @@ public class TinkerpopDao implements GraphDBInterface {
 		
 		return null;
 	}
+
+  @Override
+  public UserDTO loginUser(LoginDTO login) {
+    // TODO Auto-generated method stub
+    return null;
+  }
 }
