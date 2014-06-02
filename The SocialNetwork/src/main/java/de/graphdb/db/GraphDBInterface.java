@@ -78,7 +78,7 @@ public interface GraphDBInterface {
    *          Collection<UserDTO>
    * @return Collection<UserDTO>
    */
-  public Collection<UserDTO> findFriendsOfFriends(Collection<UserDTO> friends);
+  public Collection<UserDTO> findFriendsOfFriends(UserDTO user);
 
   /**
    * Gibt Verwandte zurueck - Eventuell auf 10 oder 20 limitieren.
