@@ -56,6 +56,25 @@ public class Neo4jDaoWithRestWrapperTest {
 		assertTrue("User found but should be deleted", 0 == foundUsers.size());
 	}
 	
+	@Test
+	public void testUpdateUser() {
+		UserDTO userDTO = getUserToUpdate();
+		userDTO.setForename("new_name");
+		userDTO.setSurname("new_surname");
+		userDTO.setStreet("new_street");
+		userDTO.setHousenumber("new_housenumber");
+		userDTO.setPostcode("new_postcode");
+		userDTO.setCity("new_city");
+		userDTO.setPassword("new_password");
+		neo4jDao.updateUser(userDTO);
+		
+		Collection<UserDTO> foundUsers = neo4jDao.findUsers(userDTO.getMailadress());
+		if(0 == foundUsers.size())
+			fail("Updated user not found");
+		UserDTO updatedUser = foundUsers.iterator().next();
+		assertTrue("Updated user not equal with local copy", userDTO.areAttributesEqual(updatedUser));
+	}
+	
 	@Ignore @Test
 	public void testFindFriends() {
 		fail("Not yet implemented");
@@ -88,11 +107,12 @@ public class Neo4jDaoWithRestWrapperTest {
 
 	private static void createDummyData() {
 		neo4jDao.insertUser(getUserToDelete());
+		neo4jDao.insertUser(getUserToUpdate());
 		
 	}	
 	private static void deleteDummyData() {
 		neo4jDao.deleteUser(getUserToInsert());
-		
+		neo4jDao.deleteUser(getUserToUpdate());
 	}
 	
 	
@@ -119,6 +139,19 @@ public class Neo4jDaoWithRestWrapperTest {
 		userDTO.setPostcode("a_postcode");
 		userDTO.setCity("a_city");
 		userDTO.setPassword("a_password");
+		return userDTO;		
+	}
+	
+	private static UserDTO getUserToUpdate() {
+		UserDTO userDTO = new UserDTO();
+		userDTO.setForename("up_forename");
+		userDTO.setSurname("up_surname");
+		userDTO.setMailadress("up_mailaddress");
+		userDTO.setStreet("up_street");
+		userDTO.setHousenumber("up_housenumber");
+		userDTO.setPostcode("up_postcode");
+		userDTO.setCity("up_city");
+		userDTO.setPassword("up_password");
 		return userDTO;		
 	}
 	

@@ -32,7 +32,7 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 	private final boolean LAZY_INIT = true;
 	private RestGraphDatabase restGraphDatabase;
 	private RestAPI restAPI;
-	private QueryEngine queryEngine;
+	private QueryEngine<?> queryEngine;
 	
 	private void init() {
 		RestGraphDatabase rgdb = new RestGraphDatabase(SERVER_ROOT_URI);
@@ -66,7 +66,7 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 		return restAPI;
 	}
 
-	private QueryEngine getQueryEngine() {
+	private QueryEngine<?> getQueryEngine() {
 		if(null == queryEngine)
 			synchronized (this) {
 				if(null == queryEngine)
@@ -94,14 +94,30 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 
 	@Override
 	public UserDTO updateUser(UserDTO user) {
-		// TODO Auto-generated method stub
+		try{
+			String statement = "MATCH (u:"+UserDTO.LABEL+") WHERE u.mailaddress={ref_mailaddress} SET " +
+					"u.forename={ref_forename}, u.surname={ref_surename}, u.street={ref_street}, u.housenumber={ref_housenumber}, " +
+					"u.postcode={ref_postcode}, u.city={ref_city}, u.password={ref_password} return u";
+			getQueryEngine().query(statement, 
+					MapUtil.map("ref_forename", user.getForename(), "ref_surename", user.getSurname(),
+							"ref_street", user.getStreet(), "ref_housenumber", user.getHousenumber(),
+							"ref_postcode", user.getPostcode(), "ref_city", user.getCity(),
+							"ref_password", user.getPassword(), "ref_mailaddress", user.getMailadress()
+					));
+		}catch(Exception exc) {
+			log.error(
+					String.format("Could not update user:'%s' Exception: %s", 
+							user.toString(), exc.toString()) 
+					 );
+			return null;
+		}
 		return null;
 	}
 
 	@Override
 	public boolean deleteUser(UserDTO user) {
 		try{
-			String statement = "MATCH (n) WHERE n.mailaddress={ref_mailaddress} OPTIONAL MATCH (n)-[r]-() DELETE n,r";
+			String statement = "MATCH (n:"+UserDTO.LABEL+") WHERE n.mailaddress={ref_mailaddress} OPTIONAL MATCH (n)-[r]-() DELETE n,r";
 			getQueryEngine().query(statement, MapUtil.map("ref_mailaddress", user.getMailadress()));
 		}catch(Exception exc) {
 			log.error(
@@ -126,11 +142,11 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 	public Collection<UserDTO> findUsers(String suchbegriff) {
 		final String mailaddress = suchbegriff;
 		final String queryString = "match (n) where n.mailaddress = {ref_mailaddress} return n";
-        final Iterator resultIter = getQueryEngine().query(queryString, MapUtil.map("ref_mailaddress", mailaddress)).to(Node.class).iterator();
+        final Iterator<Node> resultIter = getQueryEngine().query(queryString, MapUtil.map("ref_mailaddress", mailaddress)).to(Node.class).iterator();
         
         Collection<UserDTO> foundUsers = new ArrayList<UserDTO>();
         while(resultIter.hasNext()) {
-        	Node node = (Node) resultIter.next();
+        	Node node = resultIter.next();
         	foundUsers.add(createUserFromNode(node));
         }
         return foundUsers;
@@ -150,6 +166,7 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 
 	@Override
 	public Collection<UserDTO> findFriendsOfFriends(UserDTO user) {
+
 		// TODO Auto-generated method stub
 		return null;
 	}
