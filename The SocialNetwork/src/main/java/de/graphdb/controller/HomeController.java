@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.context.request.WebRequest;
 
-import de.graphdb.db.neo4j.Neo4jDao;
+import de.graphdb.db.orientdb.OrientDbDao;
 import de.graphdb.dto.LoginDTO;
 import de.graphdb.dto.UserDTO;
 
@@ -32,12 +32,15 @@ public class HomeController {
   private WebRequest request;
   @Autowired
   private HttpSession session;
-  private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
-  private ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("spring.xml");
+  private static final Logger logger = LoggerFactory
+      .getLogger(HomeController.class);
+  private ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
+      "spring.xml");
 
   // private TinkerpopDao db = new TinkerpopDao();
-  // private OrientDbDao db = new OrientDbDao();
-  private Neo4jDao db = new Neo4jDao();
+  private OrientDbDao db = new OrientDbDao();
+
+  // private Neo4jDao db = new Neo4jDao();
 
   @ModelAttribute("LoginDTO")
   public LoginDTO createLoginDTO() {
@@ -61,19 +64,21 @@ public class HomeController {
     logger.info("***** Login Mail=" + login.getMailadress());
     UserDTO user = db.loginUser(login);
     session.removeAttribute("activeUser");
-    if (user != null && login.getPassword() != null && !login.getPassword().isEmpty()
+    if (user != null && login.getPassword() != null
+        && !login.getPassword().isEmpty()
         && login.getPassword().equals(user.getPassword())) {
       user.setPassword("");
       session.setAttribute("activeUser", user);
+      model.put("UserDTO", user);
     }
     /**
      * TODO TEST
      */
-    user = new UserDTO();
-    user.setMailadress("test@bunny.de");
-    user.setId("12311ASASD");
-    session.setAttribute("activeUser", user);
-    model.put("UserDTO", user);
+    // user = new UserDTO();
+    // user.setMailadress("test@bunny.de");
+    // user.setId("12311ASASD");
+    // session.setAttribute("activeUser", user);
+    // model.put("UserDTO", user);
     return "index";
   }
 
@@ -84,6 +89,8 @@ public class HomeController {
     check = db.insertUser(user);
     if (!check) {
       logger.info("Fehler beim Registrieren des Nutzers: " + user);
+    } else {
+      model.put("UserDTO", createUserDTO());
     }
     return "index";
   }
@@ -118,8 +125,10 @@ public class HomeController {
    * @return redirect:Login.do
    */
   @ExceptionHandler(InvalidPropertyException.class)
-  public String handleInvalidPropertyException(InvalidPropertyException exception) {
-    logger.info("****** handleInvalidPropertyException - Catching: " + exception.getClass().getSimpleName());
+  public String handleInvalidPropertyException(
+      InvalidPropertyException exception) {
+    logger.info("****** handleInvalidPropertyException - Catching: "
+        + exception.getClass().getSimpleName());
     logger.info("Exception: " + exception);
     return "redirect:/";
   }
@@ -131,8 +140,10 @@ public class HomeController {
    * @return redirect:Login.do
    */
   @ExceptionHandler(HttpSessionRequiredException.class)
-  public String handleHttpSessionRequiredException(HttpSessionRequiredException exception) {
-    logger.info("****** handleHttpSessionRequiredException - Catching: " + exception.getClass().getSimpleName());
+  public String handleHttpSessionRequiredException(
+      HttpSessionRequiredException exception) {
+    logger.info("****** handleHttpSessionRequiredException - Catching: "
+        + exception.getClass().getSimpleName());
     logger.info("Exception: " + exception);
     return "redirect:/";
   }

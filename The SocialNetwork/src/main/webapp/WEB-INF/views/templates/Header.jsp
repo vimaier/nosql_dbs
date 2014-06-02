@@ -40,11 +40,11 @@
         <div class="clr"></div>
         <div class="menu_nav">
           <ul>
-            <li class="active"><a href="index.html">Home</a></li>
-            <li><a href="support.html">Support</a></li>
-            <li><a href="about.html">About Us</a></li>
-            <li><a href="blog.html">Blog</a></li>
-            <li><a href="contact.html">Contact Us</a></li>
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="#">Support</a></li>
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Blog</a></li>
+            <li><a href="#">Contact Us</a></li>
           </ul>
           <div class="clr"></div>
         </div>
