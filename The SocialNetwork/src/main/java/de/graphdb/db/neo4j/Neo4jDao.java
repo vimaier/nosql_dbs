@@ -166,7 +166,7 @@ public class Neo4jDao implements GraphDBInterface {
 	}
 
 	@Override
-	public Collection<UserDTO> findFriendsOfFriends(Collection<UserDTO> friends) {
+	public Collection<UserDTO> findFriendsOfFriends(UserDTO user) {
 		// TODO Auto-generated method stub
 		return null;
 	}
