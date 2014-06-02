@@ -1,11 +1,16 @@
 package de.graphdb.db.orientdb;
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
@@ -13,6 +18,7 @@ import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 
 import de.graphdb.db.GraphDBInterface;
 import de.graphdb.dto.UserDTO;
+import de.graphdb.dto.UserDTO.RELATIONSHIPS;
 
 public class OrientDbDao implements GraphDBInterface
 {
@@ -120,6 +126,12 @@ public class OrientDbDao implements GraphDBInterface
 			return null;
 		}
 		
+		if(user.getId() == null || user.getId().isEmpty())
+		{
+			log.debug("Invalid userId " + user.getId() + " -> abort update");
+			return null;
+		}
+		
 		OrientGraph g = getGraph();
 		
 		if(g != null)
@@ -128,9 +140,9 @@ public class OrientDbDao implements GraphDBInterface
 			{
 				Vertex toUpdate = g.getVertex(user.getId());
 				
-				if(user.getId() == null || user.getId().isEmpty() || toUpdate == null)
+				if(toUpdate == null)
 				{
-					log.error("Tried to update a not existing user");
+					log.error("Tried to update a not existing user for id: " + user.getId());
 					g.commit();
 					return null;
 				}
@@ -146,7 +158,7 @@ public class OrientDbDao implements GraphDBInterface
 			}
 			catch(Exception e)
 			{
-				log.error("Couldn't update user");
+				log.error("Couldn't update user",e);
 				g.rollback();
 			}
 			finally
@@ -210,6 +222,12 @@ public class OrientDbDao implements GraphDBInterface
 			return false;
 		}
 		
+		if(user.getId() == null || user.getId().isEmpty())
+		{
+			log.debug("Invalid userId " + user.getId() + " -> abort delete");
+			return false;
+		}
+		
 		OrientGraph g = getGraph();
 		
 		if(g != null)
@@ -218,7 +236,7 @@ public class OrientDbDao implements GraphDBInterface
 			{
 				Vertex toDelete = g.getVertex(user.getId());
 				
-				if(user.getId() == null || user.getId().isEmpty() || toDelete == null)
+				if(toDelete == null)
 				{
 					log.error("Tried to delete an not existing user");
 					g.commit();
@@ -250,23 +268,159 @@ public class OrientDbDao implements GraphDBInterface
 	@Override
 	public Collection<UserDTO> findFriends(UserDTO user)
 	{
-		// TODO Auto-generated method stub
+		if(user == null)
+		{
+			log.debug("UserObject is null -> abort return null");
+			return null;
+		}
+		
+		if(user.getId() == null || user.getId().isEmpty())
+		{
+			log.debug("Invalid userId " + user.getId() + " -> return null");
+			return null;
+		}
+		
+		OrientGraph g = getGraph();
+		
+		if(g != null)
+		{
+			try
+			{
+				Vertex collectFriends = g.getVertex(user.getId());
+				
+				if(collectFriends == null)
+				{
+					log.error("Tried to find friends for a not persisted user -> return null");
+					g.commit();
+					return null;
+				}
+				else
+				{
+					Collection<UserDTO> toReturn = new ArrayList<UserDTO>();
+					 
+					for(Vertex toAdd : collectFriends.getVertices(Direction.BOTH,UserDTO.RELATIONSHIPS.FRIENDS.toString()))
+					{
+						if(toAdd != collectFriends)
+						{
+							UserDTO userToAdd = new UserDTO();
+							convertVertexToUser(toAdd, userToAdd);
+							
+							if(toReturn.contains(userToAdd) == false)
+								toReturn.add(userToAdd);
+						}
+					}
+					
+					return toReturn;
+				}
+			}
+			catch(Exception e)
+			{
+				log.error("Couldn't find friends for userid: " + user.getId(),e);
+				g.rollback();
+			}
+			finally
+			{
+				g.shutdown();
+			}			
+		}	
+		
 		return null;
 	}
 
-	@Override
+	/**
+	   * Find a user by his fore/-lastname
+	   * 
+	   * @param user
+	   * @return Collection<UserDTO>
+	   */
 	public Collection<UserDTO> findUsers(String suchbegriff)
 	{
-		// TODO Auto-generated method stub
+		if(suchbegriff == null)
+		{
+			log.debug("Recieved empty keyword -> abort search and return null");
+		}
+		
+		OrientGraph g = getGraph();
+		
+		try
+		{
+			Map<String,Object> fieldValues = new HashMap<String,Object>();
+			fieldValues.put("forename", "%" + suchbegriff.toLowerCase() + "%");
+			fieldValues.put("surname", "%" + suchbegriff.toLowerCase() + "%");
+			
+			String[] splittedKeyword = suchbegriff.toLowerCase().split(" ");
+			
+			String toAppend  = "";		
+			
+			if(splittedKeyword.length == 2)
+			{
+				toAppend = " OR forename.append(surname).toLowerCase() LIKE :fl OR surname.append(forename).toLowerCase() LIKE :lf";
+				
+				fieldValues.put("fl", "%" + splittedKeyword[0] + splittedKeyword[1] + "%");
+				fieldValues.put("lf", "%" + splittedKeyword[0] + splittedKeyword[1] + "%");
+			}
+			
+			String query = "select from V WHERE forename.toLowerCase() LIKE :forename OR surname.toLowerCase() LIKE :surname" + toAppend ;
+			
+			OSQLSynchQuery<Vertex> getAllQuery = new OSQLSynchQuery<Vertex>(query);
+			List<Vertex> result = g.command(getAllQuery).execute(fieldValues);
+			
+			Collection<UserDTO> toReturn  = new ArrayList<UserDTO>();
+			
+			for(Vertex v : result)
+			{
+				UserDTO toAdd = new UserDTO();
+				convertVertexToUser(v, toAdd);
+				toReturn.add(toAdd);
+			}
+			
+			g.commit();
+			
+			log.debug("Found " + toReturn.size() + " users for keyword: " + suchbegriff);
+			
+			return toReturn;
+		}
+		catch(Exception e)
+		{
+			g.rollback();
+		}
+		finally
+		{
+			g.shutdown();
+		}
+		
 		return null;
 	}
 
 	@Override
 	public boolean makeFriends(UserDTO user, UserDTO friend)
 	{
-		if(user == null || friend == null)
+		return createRelationShip(user, friend, UserDTO.RELATIONSHIPS.FRIENDS);
+	}
+	
+	private boolean createRelationShip(UserDTO user, UserDTO user2,RELATIONSHIPS relationship)
+	{
+		if(user == null || user2 == null)
 		{
-			log.debug("Recieved null as param");
+			log.debug("Recieved null as param -> abort create realtionship");
+			return false;
+		}
+		
+		if(user.getId() == null || user.getId().isEmpty())
+		{
+			log.debug("Invalid userId " + user.getId() + " -> abort create realtionship");
+			return false;
+		}
+		
+		if(user.getId() == null || user2.getId().isEmpty())
+		{
+			log.debug("Invalid user2Id " + user2.getId() + " -> abort create realtionship");
+			return false;
+		}
+		
+		if(relationship == null)
+		{
+			log.debug("Invalid relationship: " + relationship);
 			return false;
 		}
 		
@@ -277,7 +431,7 @@ public class OrientDbDao implements GraphDBInterface
 			try
 			{
 				Vertex userV = g.getVertex(user.getId());
-				Vertex userF = g.getVertex(friend.getId());
+				Vertex userF = g.getVertex(user2.getId());
 				
 				if(userV == null || userF == null)
 				{
@@ -285,8 +439,8 @@ public class OrientDbDao implements GraphDBInterface
 					return false;
 				}
 				
-				Edge e = g.addEdge(null,userV,userF,UserDTO.RELATIONSHIP_FRIENDS);
-				e.setProperty("friendsSince", new Date(System.currentTimeMillis()).toString());
+				Edge e = g.addEdge(null,userV,userF,relationship.toString());
+				e.setProperty("dateOfCreation", new Date(System.currentTimeMillis()).toString());
 				
 				g.commit();
 				
@@ -295,7 +449,7 @@ public class OrientDbDao implements GraphDBInterface
 			}
 			catch(Exception e)
 			{
-				log.error("Couldn't create relationship 'FRIEND' between " + user.getId() + " and " + friend.getId(),e);
+				log.error("Couldn't create relationship '" + relationship + "' between " + user.getId() + " and " + user2.getId(),e);
 				g.rollback();
 			}
 			finally
@@ -306,13 +460,24 @@ public class OrientDbDao implements GraphDBInterface
 		
 		return false;
 	}
-
+	
 	@Override
 	public boolean unfriend(UserDTO user, UserDTO friend)
 	{
-		if(user == null || friend == null)
+		return deleteRelationship(user, friend, UserDTO.RELATIONSHIPS.FRIENDS);
+	}
+
+	private boolean deleteRelationship(UserDTO user, UserDTO user2, RELATIONSHIPS relationship)
+	{
+		if(user == null || user2 == null)
 		{
 			log.debug("Recieved null as param");
+			return false;
+		}
+		
+		if(relationship == null)
+		{
+			log.debug("Recieved invalid realtionship: " + relationship);
 			return false;
 		}
 		
@@ -323,7 +488,7 @@ public class OrientDbDao implements GraphDBInterface
 			try
 			{
 				Vertex userV = g.getVertex(user.getId());
-				Vertex userF = g.getVertex(friend.getId());
+				Vertex userF = g.getVertex(user2.getId());
 				
 				if(userV == null || userF == null)
 				{
@@ -331,7 +496,7 @@ public class OrientDbDao implements GraphDBInterface
 					return false;
 				}
 				
-				for(Edge e : userV.getEdges(Direction.BOTH, UserDTO.RELATIONSHIP_FRIENDS))
+				for(Edge e : userV.getEdges(Direction.BOTH, relationship.toString()))
 				{
 					if(e.getVertex(Direction.IN).getId().equals(userF.getId()) || 
 							e.getVertex(Direction.OUT).getId().equals(userF.getId()))
@@ -347,7 +512,7 @@ public class OrientDbDao implements GraphDBInterface
 			}
 			catch(Exception e)
 			{
-				log.error("Couldn't delete relationship 'FRIEND' between " + user.getId() + " and " + friend.getId(),e);
+				log.error("Couldn't delete relationship '" + relationship + "' between " + user.getId() + " and " + user2.getId(),e);
 				g.rollback();
 			}
 			finally
@@ -362,8 +527,27 @@ public class OrientDbDao implements GraphDBInterface
 	@Override
 	public Collection<UserDTO> findFriendsOfFriends(Collection<UserDTO> friends)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		if(friends == null)
+		{
+			log.debug("Recieved null as param -> abort and return null");
+			return null;
+		}
+		
+		Collection<UserDTO> toReturn = new ArrayList<UserDTO>();
+		
+		for(UserDTO user : friends)
+		{
+			for(UserDTO toAdd : findFriends(user))
+			{
+				if(toAdd == null)
+					return null;
+				
+				if(toReturn.contains(toAdd) == false)
+					toReturn.add(toAdd);
+			}
+		}
+		
+		return toReturn;
 	}
 
 	@Override
@@ -372,5 +556,4 @@ public class OrientDbDao implements GraphDBInterface
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 }

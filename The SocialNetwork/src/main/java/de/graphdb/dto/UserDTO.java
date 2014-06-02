@@ -9,7 +9,11 @@ import org.springframework.web.multipart.commons.CommonsMultipartFile;
 public class UserDTO {
 
 	public static final String LABEL = "USER";
-	public static final String RELATIONSHIP_FRIENDS = "FRIENDS";
+	
+	public enum RELATIONSHIPS
+	{
+		FRIENDS		
+	}
 
 	private String id;
 	private String forename;
@@ -205,7 +209,7 @@ public class UserDTO {
 		sb.append("{ \"query\" : \"match (u:" + LABEL + "),(f:" + LABEL + ") ");
 		sb.append("where u.mailadress = '" + this.mailadress
 				+ "' and f.mailadress = '" + friend.mailadress + "' ");
-		sb.append("create (u)-[r:" + RELATIONSHIP_FRIENDS + " {since: '"
+		sb.append("create (u)-[r:" + RELATIONSHIPS.FRIENDS + " {since: '"
 				+ since + "'}]->(f)\" }");
 
 		return sb.toString();
@@ -218,7 +222,7 @@ public class UserDTO {
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("{ \"query\" : \"match (u:" + LABEL + ")-[:"
-				+ RELATIONSHIP_FRIENDS + "]->(f:" + LABEL + ") ");
+				+ RELATIONSHIPS.FRIENDS + "]->(f:" + LABEL + ") ");
 		sb.append("where u.mailadress = '" + this.mailadress + "' ");
 		sb.append("return f\" }");
 
@@ -284,5 +288,36 @@ public class UserDTO {
 				city.equals(other.getCity()) &&
 				password.equals(other.getPassword());
 				
+	}
+	
+	public boolean equals(Object o)
+	{
+		if(o == null)
+			return false;
+		
+		if(o instanceof UserDTO)
+		{
+			UserDTO isEquals = (UserDTO)o;
+			
+			if(this.getId() == null && isEquals.getId() == null)
+			{
+				return super.equals(o);
+			}
+			else
+			{
+				if(this.getId() == null)
+				{
+					return false;
+				}
+				else
+				{
+					return this.getId().equals(isEquals.getId());
+				}					
+			}
+		}
+		else
+		{
+			return false;
+		}
 	}
 }
