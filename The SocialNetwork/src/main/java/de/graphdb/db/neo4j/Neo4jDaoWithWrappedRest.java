@@ -141,7 +141,7 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 	 */
 	public Collection<UserDTO> findUsers(String suchbegriff) {
 		final String mailaddress = suchbegriff;
-		final String queryString = "match (n) where n.mailaddress = {ref_mailaddress} return n";
+		final String queryString = "match (u:"+UserDTO.LABEL+") where u.mailaddress = {ref_mailaddress} return u";
         final Iterator<Node> resultIter = getQueryEngine().query(queryString, MapUtil.map("ref_mailaddress", mailaddress)).to(Node.class).iterator();
         
         Collection<UserDTO> foundUsers = new ArrayList<UserDTO>();
@@ -224,8 +224,24 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 
   @Override
   public UserDTO loginUser(LoginDTO login) {
-    // TODO Auto-generated method stub
-    return null;
+	  final String queryString = "match (u:"+UserDTO.LABEL+") where u.mailaddress = {ref_mailaddress} and u.password={ref_password} return u";
+      final Iterator<Node> resultIter = getQueryEngine().query(queryString, 
+    		  MapUtil.map("ref_mailaddress", login.getMailadress(), "ref_password", login.getPassword())
+    		  ).to(Node.class).iterator();
+      
+      Collection<UserDTO> foundUsers = new ArrayList<UserDTO>();
+      while(resultIter.hasNext()) {
+      	Node node = resultIter.next();
+      	foundUsers.add(createUserFromNode(node));
+      }
+      if(0 == foundUsers.size())
+    	  return null;
+      if(1 < foundUsers.size()) {
+    	log.error(String.format("Database has several nodes for combination email(%s) and password(%s)", 
+    			login.getMailadress(), login.getPassword()) ); 
+    	return null;
+      }
+     return foundUsers.iterator().next();
   }
 }
 

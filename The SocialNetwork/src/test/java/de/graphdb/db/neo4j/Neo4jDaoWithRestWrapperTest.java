@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.graphdb.dto.LoginDTO;
 import de.graphdb.dto.UserDTO;
 
 public class Neo4jDaoWithRestWrapperTest {
@@ -75,6 +76,15 @@ public class Neo4jDaoWithRestWrapperTest {
 		assertTrue("Updated user not equal with local copy", userDTO.areAttributesEqual(updatedUser));
 	}
 	
+	@Test
+	public void testLoginUser() {
+		UserDTO userDTO = getUserForLogin();
+		LoginDTO login = new LoginDTO(userDTO.getMailadress(), userDTO.getPassword());
+		UserDTO loginUser = neo4jDao.loginUser(login);
+		
+		assertTrue("Could not login", userDTO.areAttributesEqual(loginUser));
+	}
+	
 	@Ignore @Test
 	public void testFindFriends() {
 		fail("Not yet implemented");
@@ -108,6 +118,7 @@ public class Neo4jDaoWithRestWrapperTest {
 	private static void createDummyData() {
 		neo4jDao.insertUser(getUserToDelete());
 		neo4jDao.insertUser(getUserToUpdate());
+		neo4jDao.insertUser(getUserForLogin());
 		
 	}	
 	private static void deleteDummyData() {
@@ -152,6 +163,19 @@ public class Neo4jDaoWithRestWrapperTest {
 		userDTO.setPostcode("up_postcode");
 		userDTO.setCity("up_city");
 		userDTO.setPassword("up_password");
+		return userDTO;		
+	}
+	
+	private static UserDTO getUserForLogin() {
+		UserDTO userDTO = new UserDTO();
+		userDTO.setForename("login_forename");
+		userDTO.setSurname("login_surname");
+		userDTO.setMailadress("login_mailaddress");
+		userDTO.setStreet("login_street");
+		userDTO.setHousenumber("login_housenumber");
+		userDTO.setPostcode("login_postcode");
+		userDTO.setCity("login_city");
+		userDTO.setPassword("login_password");
 		return userDTO;		
 	}
 	
