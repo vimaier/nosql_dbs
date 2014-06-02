@@ -1,10 +1,13 @@
 package de.graphdb.db.orientdb;
 
+import java.sql.Date;
 import java.util.Collection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 
@@ -97,6 +100,7 @@ public class OrientDbDao implements GraphDBInterface
 			catch(Exception e)
 			{
 				log.error("Couldn't insert new user",e);
+				g.rollback();
 			}
 			finally
 			{
@@ -143,6 +147,7 @@ public class OrientDbDao implements GraphDBInterface
 			catch(Exception e)
 			{
 				log.error("Couldn't update user");
+				g.rollback();
 			}
 			finally
 			{
@@ -185,6 +190,7 @@ public class OrientDbDao implements GraphDBInterface
 			catch(Exception e)
 			{
 				log.error("Couldn't search for user with id: " + id);
+				g.rollback();
 			}
 			finally
 			{
@@ -230,6 +236,7 @@ public class OrientDbDao implements GraphDBInterface
 			catch(Exception e)
 			{
 				log.error("Couldn't delete new user",e);
+				g.rollback();
 			}
 			finally
 			{
@@ -257,14 +264,98 @@ public class OrientDbDao implements GraphDBInterface
 	@Override
 	public boolean makeFriends(UserDTO user, UserDTO friend)
 	{
-		// TODO Auto-generated method stub
+		if(user == null || friend == null)
+		{
+			log.debug("Recieved null as param");
+			return false;
+		}
+		
+		OrientGraph g = getGraph();
+		
+		if(g != null)
+		{
+			try
+			{
+				Vertex userV = g.getVertex(user.getId());
+				Vertex userF = g.getVertex(friend.getId());
+				
+				if(userV == null || userF == null)
+				{
+					log.debug("Couldn't find both users to create a relationship");
+					return false;
+				}
+				
+				Edge e = g.addEdge(null,userV,userF,UserDTO.RELATIONSHIP_FRIENDS);
+				e.setProperty("friendsSince", new Date(System.currentTimeMillis()).toString());
+				
+				g.commit();
+				
+				log.debug("Successfully stored new realtionship");
+				return true;
+			}
+			catch(Exception e)
+			{
+				log.error("Couldn't create relationship 'FRIEND' between " + user.getId() + " and " + friend.getId(),e);
+				g.rollback();
+			}
+			finally
+			{
+				g.shutdown();
+			}			
+		}	
+		
 		return false;
 	}
 
 	@Override
 	public boolean unfriend(UserDTO user, UserDTO friend)
 	{
-		// TODO Auto-generated method stub
+		if(user == null || friend == null)
+		{
+			log.debug("Recieved null as param");
+			return false;
+		}
+		
+		OrientGraph g = getGraph();
+		
+		if(g != null)
+		{
+			try
+			{
+				Vertex userV = g.getVertex(user.getId());
+				Vertex userF = g.getVertex(friend.getId());
+				
+				if(userV == null || userF == null)
+				{
+					log.debug("Couldn't find both users to delete a relationship");
+					return false;
+				}
+				
+				for(Edge e : userV.getEdges(Direction.BOTH, UserDTO.RELATIONSHIP_FRIENDS))
+				{
+					if(e.getVertex(Direction.IN).getId().equals(userF.getId()) || 
+							e.getVertex(Direction.OUT).getId().equals(userF.getId()))
+					{
+						g.removeEdge(e);
+					}
+				}
+				
+				g.commit();
+				
+				log.debug("Successfully deleted realtionship");
+				return true;
+			}
+			catch(Exception e)
+			{
+				log.error("Couldn't delete relationship 'FRIEND' between " + user.getId() + " and " + friend.getId(),e);
+				g.rollback();
+			}
+			finally
+			{
+				g.shutdown();
+			}			
+		}	
+		
 		return false;
 	}
 
