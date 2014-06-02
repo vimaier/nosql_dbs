@@ -4,6 +4,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.junit.Test;
@@ -462,6 +463,52 @@ public class OrientDbConnectionTest
 			
 			dao.deleteUser(u1);
 			dao.deleteUser(u2);
+			
+			OrientDbConnection.getInstance().close();
+		}
+		catch(Exception e)
+		{
+			log.error("",e);
+			fail("Unexpected exception");
+		}		
+	}
+	
+	@Test
+	public void findFriendsTest()
+	{
+		log.debug("Start loginTest");
+		
+		try
+		{
+			OrientDbDao dao = new OrientDbDao();
+			
+			UserDTO u1 = getTestUser(1);
+			UserDTO u2 = getTestUser(2);
+			UserDTO u3 = getTestUser(3);
+			
+			assertTrue(dao.insertUser(u1));
+			assertTrue(dao.insertUser(u2));
+			assertTrue(dao.insertUser(u3));
+			
+			dao.makeFriends(u1, u2);
+			dao.makeFriends(u2, u3);
+			
+			Collection<UserDTO> friendsToLookAfter = new ArrayList<UserDTO>();
+			friendsToLookAfter.add(u2);
+			
+			Collection<UserDTO> resultList = dao.findFriendsOfFriends(friendsToLookAfter);
+			
+			assertTrue(resultList != null);
+			assertTrue(resultList.size() == 2);
+			
+			for(UserDTO u : resultList)
+			{
+				assertTrue(u3.equals(u) || u1.equals(u));
+			}
+			
+			dao.deleteUser(u1);
+			dao.deleteUser(u2);
+			dao.deleteUser(u3);
 			
 			OrientDbConnection.getInstance().close();
 		}

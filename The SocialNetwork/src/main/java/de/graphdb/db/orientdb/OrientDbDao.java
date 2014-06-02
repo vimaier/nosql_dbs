@@ -574,6 +574,7 @@ public class OrientDbDao implements GraphDBInterface
 			}
 		}
 
+		log.debug("Return a result list with size: " + toReturn.size());
 		return toReturn;
 	}
 
