@@ -1,5 +1,6 @@
 package de.graphdb.db.orientdb;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
@@ -62,13 +63,20 @@ public class OrientDbConnectionTest
 			
 			UserDTO toCompare = dao.getUserById(u.getId());
 			
-			System.out.println(toCompare);
+			assertTrue(u.getForename().equals(toCompare.getForename()));
+			assertTrue(u.getSurname().equals(toCompare.getSurname()));
+			assertTrue(u.getCity().equals(toCompare.getCity()));
+			assertTrue(u.getHousenumber().equals(toCompare.getHousenumber()));
+			assertTrue(u.getPostcode().equals(toCompare.getPostcode()));
+			assertTrue(u.getStreet().equals(toCompare.getStreet()));
+			assertTrue(u.getMailadress().equals(toCompare.getMailadress()));
+			assertTrue(u.getPassword().equals(toCompare.getPassword()));
 			
 			dao.deleteUser(u);	
 			
 			toCompare = dao.getUserById(u.getId());
 			
-			System.out.println(toCompare);
+			assertTrue(toCompare == null);
 			
 			c.close();
 		}
