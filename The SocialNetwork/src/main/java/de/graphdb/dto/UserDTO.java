@@ -12,7 +12,7 @@ public class UserDTO {
 	public static final String RELATIONSHIP_FRIENDS = "FRIENDS";
 
 	private String id;
-	private String forename;
+	private String forname;
 	private String surname;
 	private String mailadress;
 	private String street;
@@ -22,8 +22,8 @@ public class UserDTO {
 	private String password;
 	private CommonsMultipartFile picture_up;
 
-	public String getForename() {
-		return forename;
+	public String getForname() {
+		return forname;
 	}
 
 	public String getPassword() {
@@ -34,8 +34,8 @@ public class UserDTO {
 		this.password = password;
 	}
 
-	public void setForename(String forename) {
-		this.forename = forename;
+	public void setForname(String forename) {
+		this.forname = forename;
 	}
 
 	public String getSurname() {
@@ -102,7 +102,7 @@ public class UserDTO {
 			String street, String housenumber, String postcode, String city,
 			String password, CommonsMultipartFile picture_up) {
 		super();
-		this.forename = forname;
+		this.forname = forname;
 		this.surname = surname;
 		this.mailadress = mailadress;
 		this.street = street;
@@ -115,7 +115,7 @@ public class UserDTO {
 
 	@Override
 	public String toString() {
-		return "UserDTO [id=" + id + ", forname=" + forename + ", surname=" + surname
+		return "UserDTO [id=" + id + ", forname=" + forname + ", surname=" + surname
 				+ ", mailadress=" + mailadress + ", street=" + street
 				+ ", housenumber=" + housenumber + ", postcode=" + postcode
 				+ ", city=" + city + ", picture_up=" + picture_up + "]";
@@ -128,8 +128,8 @@ public class UserDTO {
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("{ \"query\" : \"create (u:" + LABEL + "{");
-		if (this.forename != null)
-			sb.append("forname: '" + this.forename + "',");
+		if (this.forname != null)
+			sb.append("forname: '" + this.forname + "',");
 		if (this.surname != null)
 			sb.append("surname: '" + this.surname + "',");
 		if (this.mailadress != null)
@@ -158,8 +158,8 @@ public class UserDTO {
 
 		sb.append("{ \"query\" : \"match (u:" + LABEL + ") ");
 		sb.append("where u.mailadress = '" + this.mailadress + "' ");
-		if (this.forename != null)
-			sb.append("set u.forname = '" + this.forename + "',");
+		if (this.forname != null)
+			sb.append("set u.forname = '" + this.forname + "',");
 		if (this.surname != null)
 			sb.append("u.surname = '" + this.surname + "',");
 		if (this.street != null)
@@ -233,8 +233,8 @@ public class UserDTO {
 		
 		// beginn
 		sb.append("g.addVertex([");
-		if(this.forename != null)
-			sb.append("forname: '" + this.forename + "',");
+		if(this.forname != null)
+			sb.append("forname: '" + this.forname + "',");
 		if(this.surname != null)
 			sb.append("surname: '" + this.surname + "',");
 		if(this.mailadress != null)
@@ -276,7 +276,7 @@ public class UserDTO {
 		if(this == other)
 			return true;
 		return mailadress.equals(other.getMailadress()) &&
-				forename.equals(other.getForename()) &&
+				forname.equals(other.getForname()) &&
 				surname.equals(other.getSurname()) &&
 				street.equals(other.getStreet()) &&
 				housenumber.equals(other.getHousenumber()) &&
