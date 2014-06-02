@@ -4,6 +4,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +16,7 @@ import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 
+import de.graphdb.dto.LoginDTO;
 import de.graphdb.dto.UserDTO;
 
 public class OrientDbConnectionTest
@@ -28,14 +32,14 @@ public class OrientDbConnectionTest
 		if(index > 0)
 			indexString = "" + index;
 		
-		u.setForename("test" + indexString + " _forename");
-		u.setSurname("test" + indexString + " _surname");
-		u.setCity("test" + indexString + " _city");
-		u.setHousenumber("test" + indexString + " _housenumber");
-		u.setPostcode("test" + indexString + " _postcode");
-		u.setStreet("test" + indexString + " _street");
-		u.setMailadress("test" + indexString + " _email");
-		u.setPassword("test" + indexString + " _password");
+		u.setForename("test" + indexString + "_forename");
+		u.setSurname("test" + indexString + "_surname");
+		u.setCity("test" + indexString + "_city");
+		u.setHousenumber("test" + indexString + "_housenumber");
+		u.setPostcode("test" + indexString + "_postcode");
+		u.setStreet("test" + indexString + "_street");
+		u.setMailadress("test" + indexString + "_email");
+		u.setPassword("test" + indexString + "_password");
 		
 		return u;
 	}
@@ -307,7 +311,7 @@ public class OrientDbConnectionTest
 	@Test
 	public void unfriendTest()
 	{
-		log.debug("Start makeFriendsTest");
+		log.debug("Start unfriendTest");
 		
 		try
 		{
@@ -350,6 +354,161 @@ public class OrientDbConnectionTest
 			
 			assertTrue(dao.deleteUser(u1));	
 		    assertTrue(dao.deleteUser(u2));
+			
+			OrientDbConnection.getInstance().close();
+		}
+		catch(Exception e)
+		{
+			log.error("",e);
+			fail("Unexpected exception");
+		}		
+	}
+	
+	@Test
+	public void findUsersTest()
+	{
+		log.debug("Start findUsersTest");
+		
+		try
+		{
+			OrientDbDao dao = new OrientDbDao();
+			
+			UserDTO u1 = getTestUser(1);
+			UserDTO u2 = getTestUser(2);
+			UserDTO u3 = getTestUser(3);
+			
+			assertTrue(dao.findUsers("test").size() == 0);
+			
+			assertTrue(dao.insertUser(u1));
+			assertTrue(dao.insertUser(u2));
+			assertTrue(dao.insertUser(u3));
+			
+			Collection<UserDTO> searchResult = dao.findUsers("test");
+			
+			assertTrue(searchResult != null);
+			assertTrue(searchResult.size() == 3);
+			
+			boolean bu1 = false;
+			boolean bu2 = false;
+			boolean bu3 = false;
+			
+			for(UserDTO user : searchResult)
+			{
+				assertTrue(user != null);
+				
+				if(user.equals(u1))
+					bu1 = true;
+				
+				if(user.equals(u2))
+					bu2 = true;
+				
+				if(user.equals(u3))
+					bu3 = true;
+			}
+			
+			assertTrue(bu1 && bu2 && bu3);
+			
+			searchResult = dao.findUsers("test1");
+			
+			assertTrue(searchResult != null);
+			assertTrue(searchResult.size() == 1);
+			
+			for(UserDTO user : searchResult)
+			{
+				assertTrue(u1.equals(user));
+			}	
+			
+			dao.deleteUser(u1);
+			dao.deleteUser(u2);
+			dao.deleteUser(u3);
+			
+			OrientDbConnection.getInstance().close();
+		}
+		catch(Exception e)
+		{
+			log.error("",e);
+			fail("Unexpected exception");
+		}		
+	}
+	
+	@Test
+	public void loginTest()
+	{
+		log.debug("Start loginTest");
+		
+		try
+		{
+			OrientDbDao dao = new OrientDbDao();
+			
+			UserDTO u1 = getTestUser(1);
+			
+			LoginDTO login = new LoginDTO();
+			login.setMailadress(u1.getMailadress());
+			login.setPassword(u1.getPassword());
+			
+			assertTrue(dao.loginUser(login) == null);
+			
+			assertTrue(dao.insertUser(u1));				
+			
+			UserDTO loggedInUser = dao.loginUser(login);
+			
+			assertTrue(loggedInUser != null);
+			assertTrue(loggedInUser.equals(u1));
+			
+			UserDTO u2 = getTestUser(1);
+			
+			assertTrue(dao.insertUser(u2));
+			
+			assertTrue(dao.loginUser(login) == null);
+			
+			dao.deleteUser(u1);
+			dao.deleteUser(u2);
+			
+			OrientDbConnection.getInstance().close();
+		}
+		catch(Exception e)
+		{
+			log.error("",e);
+			fail("Unexpected exception");
+		}		
+	}
+	
+	@Test
+	public void findFriendsTest()
+	{
+		log.debug("Start loginTest");
+		
+		try
+		{
+			OrientDbDao dao = new OrientDbDao();
+			
+			UserDTO u1 = getTestUser(1);
+			UserDTO u2 = getTestUser(2);
+			UserDTO u3 = getTestUser(3);
+			
+			assertTrue(dao.insertUser(u1));
+			assertTrue(dao.insertUser(u2));
+			assertTrue(dao.insertUser(u3));
+			
+			dao.makeFriends(u1, u2);
+			dao.makeFriends(u2, u3);
+			
+			Collection<UserDTO> friendsToLookAfter = new ArrayList<UserDTO>();
+			friendsToLookAfter.add(u2);
+			
+			Collection<UserDTO> resultList = dao.findFriendsOfFriends(friendsToLookAfter);
+			
+			assertTrue(resultList != null);
+			assertTrue(resultList.size() == 2);
+			
+			for(UserDTO u : resultList)
+			{
+				assertTrue(u3.equals(u) || u1.equals(u));
+			}
+			
+			dao.deleteUser(u1);
+			dao.deleteUser(u2);
+			dao.deleteUser(u3);
 			
 			OrientDbConnection.getInstance().close();
 		}
