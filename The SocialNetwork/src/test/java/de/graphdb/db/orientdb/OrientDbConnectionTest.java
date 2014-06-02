@@ -4,7 +4,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import org.junit.Test;
@@ -92,6 +91,8 @@ public class OrientDbConnectionTest
 			assertFalse(dao.insertUser(u));
 			
 			UserDTO toCompare = dao.getUserById(u.getId());
+			
+			System.out.println(toCompare.getMailadress());
 			
 			assertTrue(u.getForename().equals(toCompare.getForename()));
 			assertTrue(u.getSurname().equals(toCompare.getSurname()));
@@ -455,14 +456,7 @@ public class OrientDbConnectionTest
 			assertTrue(loggedInUser != null);
 			assertTrue(loggedInUser.equals(u1));
 			
-			UserDTO u2 = getTestUser(1);
-			
-			assertTrue(dao.insertUser(u2));
-			
-			assertTrue(dao.loginUser(login) == null);
-			
 			dao.deleteUser(u1);
-			dao.deleteUser(u2);
 			
 			OrientDbConnection.getInstance().close();
 		}
@@ -478,14 +472,15 @@ public class OrientDbConnectionTest
 	{
 		log.debug("Start loginTest");
 		
+		UserDTO u1 = getTestUser(1);
+		UserDTO u2 = getTestUser(2);
+		UserDTO u3 = getTestUser(3);
+		UserDTO u4 = getTestUser(4);
+		UserDTO u5 = getTestUser(5);
+		OrientDbDao dao = new OrientDbDao();
+		
 		try
-		{
-			OrientDbDao dao = new OrientDbDao();
-			
-			UserDTO u1 = getTestUser(1);
-			UserDTO u2 = getTestUser(2);
-			UserDTO u3 = getTestUser(3);
-			
+		{		
 			assertTrue(dao.insertUser(u1));
 			assertTrue(dao.insertUser(u2));
 			assertTrue(dao.insertUser(u3));
@@ -493,29 +488,45 @@ public class OrientDbConnectionTest
 			dao.makeFriends(u1, u2);
 			dao.makeFriends(u2, u3);
 			
-			Collection<UserDTO> friendsToLookAfter = new ArrayList<UserDTO>();
-			friendsToLookAfter.add(u2);
+			Collection<UserDTO> resultList = dao.findFriendsOfFriends(u1);
 			
-			Collection<UserDTO> resultList = dao.findFriendsOfFriends(friendsToLookAfter);
-			
-			assertTrue(resultList != null);
-			assertTrue(resultList.size() == 2);
+			assertTrue(resultList != null);			
+			assertTrue(resultList.size() == 1);
 			
 			for(UserDTO u : resultList)
 			{
-				assertTrue(u3.equals(u) || u1.equals(u));
+				assertTrue(u3.equals(u));
 			}
 			
-			dao.deleteUser(u1);
-			dao.deleteUser(u2);
-			dao.deleteUser(u3);
+			assertTrue(dao.insertUser(u4));
+			assertTrue(dao.insertUser(u5));
 			
-			OrientDbConnection.getInstance().close();
+			dao.makeFriends(u2, u4);
+			dao.makeFriends(u2, u5);
+			
+			resultList = dao.findFriendsOfFriends(u1);
+			
+			assertTrue(resultList != null);			
+			assertTrue(resultList.size() == 3);
+			
+			for(UserDTO u : resultList)
+			{
+				assertTrue(u3.equals(u) || u4.equals(u)|| u5.equals(u));
+			}			
 		}
 		catch(Exception e)
 		{
 			log.error("",e);
 			fail("Unexpected exception");
-		}		
+		}	
+		finally
+		{
+			dao.deleteUser(u1);
+			dao.deleteUser(u2);
+			dao.deleteUser(u3);
+			dao.deleteUser(u4);
+			dao.deleteUser(u5);			
+			OrientDbConnection.getInstance().close();
+		}
 	}
 }

@@ -10,6 +10,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
@@ -66,7 +67,7 @@ public class OrientDbDao implements GraphDBInterface
 		u.setHousenumber((String) v.getProperty("housenumber"));
 		u.setPostcode((String) v.getProperty("postcode"));
 		u.setStreet((String) v.getProperty("street"));
-		u.setMailadress((String) v.getProperty("email"));
+		u.setMailadress((String) v.getProperty("mailadress"));
 		u.setPassword((String) v.getProperty("password"));	
 	}
 
@@ -93,7 +94,7 @@ public class OrientDbDao implements GraphDBInterface
 				}
 				else
 				{
-					Vertex v = g.addVertex(null);
+					Vertex v = g.addVertex("V");
 
 					convertUserToVertex(v, user);
 
@@ -377,7 +378,7 @@ public class OrientDbDao implements GraphDBInterface
 
 			OSQLSynchQuery<Vertex> getAllQuery = new OSQLSynchQuery<Vertex>(query);
 			Iterable<Vertex> result = g.command(getAllQuery).execute(fieldValues);
-			
+
 			Collection<UserDTO> toReturn  = new ArrayList<UserDTO>();
 
 			for(Vertex v : result)
@@ -543,7 +544,7 @@ public class OrientDbDao implements GraphDBInterface
 	}
 
 	@Override
-	public Collection<UserDTO> findFriendsOfFriends(Collection<UserDTO> friends)
+	public Collection<UserDTO> findFriendsOfFriends(UserDTO user)
 	{
 		/*This is not really the requested implementation. 
 		 * It should be replaced with a 'traverse' query.
@@ -553,29 +554,43 @@ public class OrientDbDao implements GraphDBInterface
 		 * and to use the orientdb traverse api to retrieve all desired users
 		 * 
 		 * */
-		
-		if(friends == null)
+
+		if(user == null)
 		{
 			log.debug("Recieved null as param -> abort and return null");
 			return null;
 		}
 
-		Collection<UserDTO> toReturn = new ArrayList<UserDTO>();
+		OrientGraph g = getGraph();
 
-		for(UserDTO user : friends)
+		try
 		{
-			for(UserDTO toAdd : findFriends(user))
+			/*convert nodes to userObjects*/
+			Collection<UserDTO> toReturn = new ArrayList<UserDTO>();
+			for (ODocument id : new OSQLSynchQuery<ODocument>("select from (traverse out_FRIENDS,in from " + user.getId() + " while $depth <= 4) where $depth = 4 AND @class = 'V'"))
 			{
-				if(toAdd == null)
-					return null;
-
-				if(toReturn.contains(toAdd) == false)
-					toReturn.add(toAdd);
+				Vertex vToAdd = g.getVertex(id.getIdentity().toString());
+				UserDTO toAdd = new UserDTO();
+				convertVertexToUser(vToAdd, toAdd);
+				toReturn.add(toAdd);
 			}
-		}
 
-		log.debug("Return a result list with size: " + toReturn.size());
-		return toReturn;
+			log.debug("Return a result list with size: " + toReturn.size());
+
+			g.commit();
+			return toReturn;
+		}
+		catch(Exception e)
+		{
+			log.error("Couldn't traverse friend of friend if the user: " + user.getId(),e);
+			g.rollback();
+		}
+		finally
+		{
+			g.shutdown();
+		}		
+
+		return null;	
 	}
 
 	@Override
@@ -599,7 +614,7 @@ public class OrientDbDao implements GraphDBInterface
 			log.debug("LoginObject contains an invalid password: " + login.getPassword());
 			return null;
 		}
-		
+
 		if(login.getMailadress() == null || login.getMailadress().isEmpty())
 		{
 			log.debug("LoginObject contains an invalid mailadress " + login.getMailadress());
@@ -617,35 +632,36 @@ public class OrientDbDao implements GraphDBInterface
 			Map<String,Object> fieldValues = new HashMap<String,Object>();
 			fieldValues.put("password", login.getPassword());
 			fieldValues.put("mail", login.getMailadress().toLowerCase());
-			
+
 			//execute query
 			OSQLSynchQuery<Vertex> getAllQuery = new OSQLSynchQuery<Vertex>(query);
 			Iterable<Vertex> vs = g.command(getAllQuery).execute(fieldValues);
-			
+
 			/*convert nodes to userObjects*/
 			List<Vertex> result = new ArrayList<Vertex>();
 			for(Vertex v : vs)
 				result.add(v);
-			
+
 			/*start security control. The result of this query should be a single result*/
 			if(result.size() == 0)
 			{
 				log.debug("Couldn't find a user for mail: " + login.getMailadress() + " and password: "+ login.getPassword());
-				return null;
 			}
-			
+
 			if(result.size() > 1)
 			{
 				log.debug("Found multiple entries for users with mail: " + login.getMailadress() + " and password: "+ login.getPassword());
-				return null;
 			}
-			
+
 			if(result.size() == 1)
 			{
 				UserDTO toReturn = new UserDTO();
 				convertVertexToUser(result.get(0),toReturn);
+				g.commit();
 				return toReturn;
-			}			
+			}		
+
+			g.commit();
 		}
 		catch(Exception e)
 		{
