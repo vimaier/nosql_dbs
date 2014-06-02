@@ -100,8 +100,17 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 
 	@Override
 	public boolean deleteUser(UserDTO user) {
-		// TODO Auto-generated method stub
-		return false;
+		try{
+			String statement = "MATCH (n) WHERE n.mailaddress={ref_mailaddress} OPTIONAL MATCH (n)-[r]-() DELETE n,r";
+			getQueryEngine().query(statement, MapUtil.map("ref_mailaddress", user.getMailadress()));
+		}catch(Exception exc) {
+			log.error(
+					String.format("Could not delete user:'%s' Exception: %s", 
+							user.toString(), exc.toString()) 
+					 );
+			return false;
+		}
+		return true;
 	}
 
 	@Override
@@ -117,7 +126,7 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 	public Collection<UserDTO> findUsers(String suchbegriff) {
 		final String mailaddress = suchbegriff;
 		final String queryString = "match (n) where n.mailaddress = {ref_mailaddress} return n";
-        final Iterator resultIter = queryEngine.query(queryString, MapUtil.map("ref_mailaddress", mailaddress)).to(Node.class).iterator();
+        final Iterator resultIter = getQueryEngine().query(queryString, MapUtil.map("ref_mailaddress", mailaddress)).to(Node.class).iterator();
         
         Collection<UserDTO> foundUsers = new ArrayList<UserDTO>();
         while(resultIter.hasNext()) {
