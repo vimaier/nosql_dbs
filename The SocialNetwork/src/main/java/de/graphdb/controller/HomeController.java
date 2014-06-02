@@ -107,6 +107,7 @@ public class HomeController {
   public String Logout(ModelMap model, @ModelAttribute("UserDTO") UserDTO user) {
     logger.info("***** Logout USER=" + user);
     session.removeAttribute("activeUser");
+    model.put("UserDTO", createUserDTO());
     return "index";
   }
 

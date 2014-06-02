@@ -25,7 +25,7 @@
             <div class="login">
               <input type="button" id="registeropen" class="rm fl button_grey" value="<fmt:message key="menu.update"/>" />
               <sf:form action="Logout.do" commandName="UserDTO">
-                <input type="button" class="rm fr button_blue" value="<fmt:message key="menu.logout"/>" />
+                <input type="submit" class="rm fr button_blue" value="<fmt:message key="menu.logout"/>" />
               </sf:form>
             </div>
           </c:when>
