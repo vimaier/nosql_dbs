@@ -1,6 +1,7 @@
 package de.graphdb.db.neo4j;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import de.graphdb.db.GraphDBInterface;
 import de.graphdb.dto.LoginDTO;
 import de.graphdb.dto.UserDTO;
+import de.graphdb.dto.UserDTO.RELATIONSHIPS;
 
 /*
  * Some good examples...
@@ -35,9 +37,9 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 	private QueryEngine<?> queryEngine;
 	
 	private void init() {
-		RestGraphDatabase rgdb = new RestGraphDatabase(SERVER_ROOT_URI);
-		restAPI = (rgdb).getRestAPI();
-		queryEngine = new RestCypherQueryEngine(restAPI); 
+		restGraphDatabase = new RestGraphDatabase(SERVER_ROOT_URI);
+		restAPI = getRestGraphDatabase().getRestAPI();
+		queryEngine = new RestCypherQueryEngine(getRestAPI()); 
 	}
 	
 	public Neo4jDaoWithWrappedRest() {
@@ -131,8 +133,16 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 
 	@Override
 	public Collection<UserDTO> findFriends(UserDTO user) {
-		// TODO Auto-generated method stub
-		return null;
+		final String queryString = "match (u:"+UserDTO.LABEL+")-[:" + RELATIONSHIPS.FRIENDS + "]->(f:"+UserDTO.LABEL+")" +
+				"where u.mailaddress = {ref_mailaddress} return f";
+        final Iterator<Node> resultIter = getQueryEngine().query(queryString, MapUtil.map("ref_mailaddress", user.getMailadress())).to(Node.class).iterator();
+        
+        Collection<UserDTO> friends = new ArrayList<UserDTO>();
+        while(resultIter.hasNext()) {
+        	Node node = resultIter.next();
+        	friends.add(createUserFromNode(node));
+        }
+        return friends;
 	}
 
 	@Override
@@ -154,21 +164,50 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 
 	@Override
 	public boolean makeFriends(UserDTO user, UserDTO friend) {
-		// TODO Auto-generated method stub
-		return false;
+		final String queryString = "match (u:" + UserDTO.LABEL + "),(f:" + UserDTO.LABEL + ") where u.mailadress = {r_mail_1}" +
+	            " and f.mailadress = {r_mail_2} create (u)-[r:" + RELATIONSHIPS.FRIENDS + " {since: {r_since}}]->(f)";
+		String since = Calendar.getInstance().getTime().toString();
+		try{
+			getQueryEngine().query(queryString, 
+					MapUtil.map("r_mail_1", user.getMailadress(), "r_mail_2", friend.getMailadress(), "r_since", since)
+					);
+		}catch(Exception exc) {
+			log.error(String.format("Could not make friends between user(%s) and friend(%s)"), user.toString(), friend.toString()); 
+
+			return false;
+		}
+		return true; // No check if user and friend actually exist...        
 	}
 
 	@Override
 	public boolean unfriend(UserDTO user, UserDTO friend) {
-		// TODO Auto-generated method stub
-		return false;
+		final String queryString = "match (u:" + UserDTO.LABEL + ")-[r:" + RELATIONSHIPS.FRIENDS + "]->(f:" + UserDTO.LABEL + ") " +
+				"where u.mailadress = {r_mail_1} and f.mailadress = {r_mail_2} delete r";
+		try{
+			getQueryEngine().query(queryString, 
+					MapUtil.map("r_mail_1", user.getMailadress(), "r_mail_2", friend.getMailadress() )
+					);
+		}catch(Exception exc) {
+			log.error(String.format("Could not delete relation between user(%s) and friend(%s)"), user.toString(), friend.toString()); 
+
+			return false;
+		}
+		return true; // No check if user and friend actually exist...  
 	}
 
 	@Override
 	public Collection<UserDTO> findFriendsOfFriends(UserDTO user) {
-
-		// TODO Auto-generated method stub
-		return null;
+		final String queryString = "match (u:"+UserDTO.LABEL+")-[:" + RELATIONSHIPS.FRIENDS + "]->(f:"+UserDTO.LABEL+")" +
+				"-[:" + RELATIONSHIPS.FRIENDS + "]->(fof) " +
+				"where u.mailaddress = {ref_mailaddress} return distinct fof";
+        final Iterator<Node> resultIter = getQueryEngine().query(queryString, MapUtil.map("ref_mailaddress", user.getMailadress())).to(Node.class).iterator();
+        
+        Collection<UserDTO> friendsOfFriends = new ArrayList<UserDTO>();
+        while(resultIter.hasNext()) {
+        	Node node = resultIter.next();
+        	friendsOfFriends.add(createUserFromNode(node));
+        }
+        return friendsOfFriends;
 	}
 
 	@Override
