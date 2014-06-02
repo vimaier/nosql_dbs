@@ -300,6 +300,7 @@ public class OrientDbDao implements GraphDBInterface
 				{
 					Collection<UserDTO> toReturn = new ArrayList<UserDTO>();
 
+					/*get all realtionships with the laben 'FRIENDS' and add the nodes to the result list*/
 					for(Vertex toAdd : collectFriends.getVertices(Direction.BOTH,UserDTO.RELATIONSHIPS.FRIENDS.toString()))
 					{
 						if(toAdd != collectFriends)
@@ -332,6 +333,15 @@ public class OrientDbDao implements GraphDBInterface
 	/**
 	 * Find a user by his fore/-lastname
 	 * 
+	 * Valid keyword are:
+	 * 
+	 * - Forename  
+	 * - Lastname  
+	 * - Forename Lastname
+	 * - Lastname Forename
+	 * 
+	 * or a substring of them
+	 * 
 	 * @param user
 	 * @return Collection<UserDTO>
 	 */
@@ -354,6 +364,7 @@ public class OrientDbDao implements GraphDBInterface
 
 			String toAppend  = "";		
 
+			/*splitt the name for key word like 'Forename Surname'*/
 			if(splittedKeyword.length == 2)
 			{
 				toAppend = " OR forename.append(surname).toLowerCase() LIKE :fl OR surname.append(forename).toLowerCase() LIKE :lf";
@@ -442,6 +453,8 @@ public class OrientDbDao implements GraphDBInterface
 					return false;
 				}
 
+				/*create a new edge between the given objects and set the current systemtime as 
+				 * date of creation*/
 				Edge e = g.addEdge(null,userV,userF,relationship.toString());
 				e.setProperty("dateOfCreation", new Date(System.currentTimeMillis()).toString());
 
@@ -499,6 +512,8 @@ public class OrientDbDao implements GraphDBInterface
 					return false;
 				}
 
+				/*select relationships of the user and delete them by user*/
+				/*A sql query could resolve the problem more elegant*/
 				for(Edge e : userV.getEdges(Direction.BOTH, relationship.toString()))
 				{
 					if(e.getVertex(Direction.IN).getId().equals(userF.getId()) || 
@@ -530,6 +545,15 @@ public class OrientDbDao implements GraphDBInterface
 	@Override
 	public Collection<UserDTO> findFriendsOfFriends(Collection<UserDTO> friends)
 	{
+		/*This is not really the requested implementation. 
+		 * It should be replaced with a 'traverse' query.
+		 * 
+		 * 
+		 * A proper way would be to replace the parameter 'friends' with a single user object
+		 * and to use the orientdb traverse api to retrieve all desired users
+		 * 
+		 * */
+		
 		if(friends == null)
 		{
 			log.debug("Recieved null as param -> abort and return null");
@@ -556,7 +580,7 @@ public class OrientDbDao implements GraphDBInterface
 	@Override
 	public Collection<UserDTO> findRelative(UserDTO user)
 	{
-		// TODO Auto-generated method stub
+		// Actually, there is no such method to create a realtionship or properie for relatives
 		return null;
 	}
 
@@ -585,20 +609,24 @@ public class OrientDbDao implements GraphDBInterface
 
 		try
 		{
+			/*create basic query to look after mail and password*/
 			String query = "SELECT FROM V WHERE password LIKE :password AND mailadress.toLowerCase() LIKE :mail" ;
 
+			/*Set fields*/
 			Map<String,Object> fieldValues = new HashMap<String,Object>();
 			fieldValues.put("password", login.getPassword());
 			fieldValues.put("mail", login.getMailadress().toLowerCase());
 			
+			//execute query
 			OSQLSynchQuery<Vertex> getAllQuery = new OSQLSynchQuery<Vertex>(query);
-			List<Vertex> result = new ArrayList<Vertex>();
-
 			Iterable<Vertex> vs = g.command(getAllQuery).execute(fieldValues);
 			
+			/*convert nodes to userObjects*/
+			List<Vertex> result = new ArrayList<Vertex>();
 			for(Vertex v : vs)
 				result.add(v);
 			
+			/*start security control. The result of this query should be a single result*/
 			if(result.size() == 0)
 			{
 				log.debug("Couldn't find a user for mail: " + login.getMailadress() + " and password: "+ login.getPassword());
