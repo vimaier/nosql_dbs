@@ -60,7 +60,7 @@ public class OrientDbDao implements GraphDBInterface
 
 	private void convertVertexToUser(Vertex v,UserDTO u)
 	{
-		u.setId(v.getId().toString());
+		u.setId(v.getId().toString().substring(1));
 		u.setForename((String) v.getProperty("forename"));
 		u.setSurname((String) v.getProperty("surname"));
 		u.setCity((String) v.getProperty("city"));

@@ -59,19 +59,46 @@
 				<c:out value="${UserIndexForm.user.city}" />
 			</div>
 			<div class="clr"></div>
+			<c:choose>
+				<c:when test="${activeUser.id!=UserIndexForm.user.id && !isFriend}">
+					<sf:form action="MakeFriends.do" commandName="UserIndexForm">
+						<input type="submit" class="button_blue"
+							value="<fmt:message key="menu.make.friend"/>"
+							style="margin:10px auto 0px auto;" />
+					</sf:form>
+				</c:when>
+				<c:when test="${isFriend}">
+					<sf:form action="Unfriend.do" commandName="UserIndexForm">
+						<input type="submit" class="button_blue"
+							value="<fmt:message key="menu.unfriend"/>"
+							style="margin:10px auto 0px auto;" />
+					</sf:form>
+				</c:when>
+				<c:when test="${activeUser.id==UserIndexForm.user.id}">
+					<sf:form action="Delete.do" commandName="UserIndexForm">
+						<input type="submit" class="button_grey"
+							value="<fmt:message key="menu.delete"/>"
+							style="margin:10px auto 0px auto;" />
+					</sf:form>
+				</c:when>
+			</c:choose>
 		</div>
 		<div id="userindexright">
-		<c:forEach items="${UserIndexForm.friends}" var="friend">
-				<div class="friendpic" onclick="location.href='UserIndex.do?id=${friend.id}';">
+			<c:forEach items="${UserIndexForm.friends}" var="friend">
+				<div class="friendpic"
+					onclick="location.href='UserIndex.do?id=${friend.id}';">
 					<img alt="" src="resources/images/profile.jpg">
-					<div><c:out value="${friend.forename}" />&nbsp;<c:out value="${friend.surname}" /></div>
+					<div>
+						<c:out value="${friend.forename}" />
+						&nbsp;
+						<c:out value="${friend.surname}" />
+					</div>
 				</div>
-		</c:forEach>
+			</c:forEach>
 			<div class="clr"></div>
 		</div>
-		<div id="userindexleft">
-		Freunde von Freunden
-		</div>
+		<br />
+		<div id="userindexleft">Freunde von Freunden</div>
 		<div class="clr"></div>
 	</div>
 </div>
