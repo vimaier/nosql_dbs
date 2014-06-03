@@ -16,6 +16,7 @@ import de.graphdb.dto.UserDTO;
 
 public class Neo4jDaoWithRestWrapperTest {
 
+	@SuppressWarnings("unused")
 	private static Logger log = LoggerFactory.getLogger(Neo4jDaoWithRestWrapperTest.class);
 	private static Neo4jDaoWithWrappedRest neo4jDao = null;
 
@@ -36,15 +37,9 @@ public class Neo4jDaoWithRestWrapperTest {
 	public void testInsertUser() {
 		UserDTO user = getUserToInsert();
 		neo4jDao.insertUser(user);
-		Collection<UserDTO> foundUsers = neo4jDao.findUsers(user.getMailadress());
-		if(1 < foundUsers.size()) {
-			fail( String.format("Found more than one user for '%s'", user.getMailadress()) );
-		}
-		if(0 == foundUsers.size()) {
-			fail("Could not find created user");
-		}
-		UserDTO userInDb = foundUsers.iterator().next();
-		assertTrue("Created user and fetched user are not equal", userInDb.areAttributesEqual(user));
+		UserDTO userInDb = neo4jDao.getUserById(user.getId());
+
+		assertTrue("Created user and fetched user are not equal", null != userInDb && userInDb.areAttributesEqual(user));
 	}
 	
 	@Test
