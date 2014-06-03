@@ -52,8 +52,14 @@ public class HomeController {
     return (UserDTO) context.getBean("UserDTO");
   }
 
-  @RequestMapping(value = "/", method = RequestMethod.GET)
+  @RequestMapping(value = "Home.do", method = RequestMethod.GET)
   public String home(ModelMap model) {
+    model.put("UserDTO", (UserDTO) session.getAttribute("activeUser"));
+    return "index";
+  }
+
+  @RequestMapping(value = "/", method = RequestMethod.GET)
+  public String homeLoggedIn(ModelMap model) {
     model.put("UserDTO", createUserDTO());
     model.put("LoginDTO", createLoginDTO());
     return "index";
@@ -71,15 +77,7 @@ public class HomeController {
       session.setAttribute("activeUser", user);
       model.put("UserDTO", user);
     }
-    /**
-     * TODO TEST
-     */
-    // user = new UserDTO();
-    // user.setMailadress("test@bunny.de");
-    // user.setId("12311ASASD");
-    // session.setAttribute("activeUser", user);
-    // model.put("UserDTO", user);
-    return "index";
+    return "userindex";
   }
 
   @RequestMapping(value = "Register.do", method = RequestMethod.POST)
@@ -107,7 +105,7 @@ public class HomeController {
       user.setPassword("");
       session.setAttribute("activeUser", user);
     }
-    return "index";
+    return "userindex";
   }
 
   @RequestMapping(value = "Logout.do", method = RequestMethod.POST)
@@ -116,6 +114,13 @@ public class HomeController {
     session.removeAttribute("activeUser");
     model.put("UserDTO", createUserDTO());
     return "index";
+  }
+
+  @RequestMapping(value = "UserIndex.do")
+  public String UserIndex(ModelMap model) {
+    logger.info("***** UserIndex");
+    model.put("UserDTO", (UserDTO) session.getAttribute("activeUser"));
+    return "userindex";
   }
 
   /**
