@@ -22,19 +22,19 @@ public class TinkerpopDao implements GraphDBInterface {
 	// Rexster-object for client connection
 	private RexsterClient client;
 
-	private boolean clientStatus = false;  
-	
+	private boolean clientStatus = false;
+
 	// Defines strings for connection
-	private final String serverIP = "10.0.3.44"; // ip of the server
-	private final String serverDB = "tinkergraph"; // name of the
-															// database
+	private final String serverIP = "10.0.107.174"; // ip of the server
+	private final String serverDB = "neo4jsample"; // name of the
+													// database
 
 	// Connect to Rexster-client
 	private void connect() {
 		try {
-			if(clientStatus == false){
+			if (clientStatus == false) {
 				clientStatus = true;
-				client = RexsterClientFactory.open(serverIP, serverDB);				
+				client = RexsterClientFactory.open(serverIP, serverDB);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -50,27 +50,28 @@ public class TinkerpopDao implements GraphDBInterface {
 			e.printStackTrace();
 		}
 	}
-	
-	private Object getVIdByEmail(UserDTO user){
+
+	/**
+	 * Get the Id of a User by email-adress
+	 * @param user
+	 * @return 
+	 */
+	private Object getVIdByEmail(UserDTO user) {
 		List<Map<String, Object>> results;
 		Object id = null;
-		
+
 		try {
 			connect();
-			
-			if(user.getMailadress() != null){
-				results = client.execute("g.V.filter{it.mailadress=='" + user.getMailadress() + "'");
+
+			if (user.getMailadress() != null) 
+			{
+				results = client.execute("g.V.has('mailadress', '" + user.getMailadress() + "').id");
 				
-				if(results.size() == 1)
-				{
-					id = results.get(0).get("_Id");
-				}
+				id = results.get(0);
 			}
 		} catch (RexProException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -80,88 +81,113 @@ public class TinkerpopDao implements GraphDBInterface {
 	@Override
 	public boolean insertUser(UserDTO user) {
 		boolean ret = false;
-		
-		try {
-			// String gremlinQuery = user.getInsertGremlinQuery();
 
+		try {
 			connect();
 
-			List<Map<String, Object>> results = client.execute("g.addVertex(["
-					+ "forname: " + user.getForename() + ","
-					+ "surname: " + user.getSurname() + ","
-					+ "mailadress: " + user.getMailadress()	+ ","
-					+ "street: " + user.getStreet() + ","
-					+ "housenumber: " + user.getHousenumber() + ","
-					+ "postcode: " + user.getPostcode() + ","
-					+ "city: " + user.getCity() + ","
-					+ "password: " + user.getPassword() + ","
-					+ "])");
+			if (user.getMailadress() != null) {
+				StringBuilder sb = new StringBuilder();
 
-			if (results.size() > 0) {
-				Map resMap = results.get(0);
-				boolean hasId = resMap.containsKey("_id");
+				// beginn
+				sb.append("g.addVertex([");
+				if (user.getForename() != null)
+					sb.append("forname: '" + user.getForename() + "',");
+				if (user.getSurname() != null)
+					sb.append("surname: '" + user.getSurname() + "',");
+				if (user.getMailadress() != null)
+					sb.append("mailadress: '" + user.getMailadress() + "',");
+				if (user.getStreet() != null)
+					sb.append("street: '" + user.getStreet() + "',");
+				if (user.getHousenumber() != null)
+					sb.append("housenumber: '" + user.getHousenumber() + "',");
+				if (user.getPostcode() != null)
+					sb.append("postcode: '" + user.getPostcode() + "',");
+				if (user.getCity() != null)
+					sb.append("city: '" + user.getCity() + "',");
+				if (user.getPassword() != null)
+					sb.append("password: '" + user.getPassword() + "',");
+				// entferne letztes komma
+				sb.deleteCharAt(sb.length() - 1);
+				// ende
+				sb.append("])");
 
-				if (true == hasId) {
-					ret = true;
+				List<Map<String, Object>> results = client.execute(sb
+						.toString());
+
+				if (results.size() > 0) {
+					Map resMap = results.get(0);
+					boolean hasId = resMap.containsKey("_id");
+
+					if (true == hasId) {
+						ret = true;
+					}
 				}
 			}
 
 			disconnect();
+
 		} catch (Exception e) {
+			System.out.println(e.toString());
 			disconnect();
 		}
-		
+
 		return ret;
 	}
 
 	@Override
-	public UserDTO updateUser(UserDTO user) {		
-		UserDTO userRet = user; 
+	public UserDTO updateUser(UserDTO user) {
+		UserDTO userRet = user;
 		Object id = getVIdByEmail(user);
 		
+		System.out.println("#######################################################" + id);
+
 		try {
-			if(id != null)
-			{				
-				if(user.getForename() != null) 
+			if (id != null) {
+				if (user.getForename() != null)
 					client.execute("g.v(" + id + ").forname='" + user.getForename() + "'");
-				if(user.getSurname() != null)
+				if (user.getSurname() != null)
 					client.execute("g.v(" + id + ").surname='" + user.getSurname() + "'");
-				if(user.getStreet() != null)
-					client.execute("g.v(" + id + ").street='" + user.getStreet() + "'");
-				if(user.getHousenumber() != null)
-					client.execute("g.v(" + id + ").housenumber='" + user.getHousenumber() + "'");
-				if(user.getPostcode() != null)
-					client.execute("g.v(" + id + ").postcode='" + user.getPostcode() + "'");
-				if(user.getCity() != null)
-					client.execute("g.v(" + id + ").city='" + user.getCity() + "'");
-				if(user.getPassword() != null)
-					client.execute("g.v(" + id + ").password='" + user.getPassword() + "'");					
+				if (user.getStreet() != null)
+					client.execute("g.v(" + id + ").street='"
+							+ user.getStreet() + "'");
+				if (user.getHousenumber() != null)
+					client.execute("g.v(" + id + ").housenumber='"
+							+ user.getHousenumber() + "'");
+				if (user.getPostcode() != null)
+					client.execute("g.v(" + id + ").postcode='"
+							+ user.getPostcode() + "'");
+				if (user.getCity() != null)
+					client.execute("g.v(" + id + ").city='" + user.getCity()
+							+ "'");
+				if (user.getPassword() != null)
+					client.execute("g.v(" + id + ").password='"
+							+ user.getPassword() + "'");
 			} else {
 				userRet = null;
-			}	
+			}
 		} catch (RexProException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} finally{
+		} finally {
 			disconnect();
 		}
-		
+
 		return userRet;
 	}
 
 	@Override
 	public boolean deleteUser(UserDTO user) {
 		boolean ret = false;
-		
+
 		Object id = getVIdByEmail(user);
-		
+
 		try {
-			List<Map<String, Object>> results = client.execute("g.v(" + id + ").remove()");
-			
-			if(results.size() == 1)
-			{
+			List<Map<String, Object>> results = client.execute("g.v(" + id
+					+ ").remove()");
+
+			if (results.size() == 1) {
 				ret = true;
 			}
 		} catch (RexProException e) {
@@ -178,20 +204,20 @@ public class TinkerpopDao implements GraphDBInterface {
 	@Override
 	public Collection<UserDTO> findFriends(UserDTO user) {
 		Collection<UserDTO> coll = new LinkedList<UserDTO>();
-		
+
 		Object id = getVIdByEmail(user);
-		
+
 		try {
-			List<Map<String, Object>> results = client.execute("g.v(" + id + ").outE('friends').inV.map");
-			
+			List<Map<String, Object>> results = client.execute("g.v(" + id
+					+ ").outE('friends').inV.map");
+
 			Iterator<Map<String, Object>> it = results.iterator();
-			
-			while(it.hasNext())
-			{
+
+			while (it.hasNext()) {
 				Map<String, Object> currMap = it.next();
-				
+
 				UserDTO newUser = new UserDTO();
-				
+
 				newUser.setForename(currMap.get("forname").toString());
 				newUser.setSurname(currMap.get("surname").toString());
 				newUser.setMailadress(currMap.get("mailadress").toString());
@@ -200,11 +226,12 @@ public class TinkerpopDao implements GraphDBInterface {
 				newUser.setPostcode(currMap.get("postcode").toString());
 				newUser.setCity(currMap.get("city").toString());
 				newUser.setPassword(currMap.get("password").toString());
-				newUser.setPicture_up((CommonsMultipartFile) currMap.get("picture_up"));
-				
+				newUser.setPicture_up((CommonsMultipartFile) currMap
+						.get("picture_up"));
+
 				coll.add(newUser);
 			}
-			
+
 		} catch (RexProException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -212,53 +239,58 @@ public class TinkerpopDao implements GraphDBInterface {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
+
 		return coll;
 	}
 
 	@Override
 	public Collection<UserDTO> findUsers(String suchbegriff) {
 		Collection<UserDTO> coll = new LinkedList<UserDTO>();
-		
+
 		try {
 			connect();
-			
+
 			List<Map<String, Object>> results = client.execute("g.V.id");
-			
+
 			Iterator<Map<String, Object>> it = results.iterator();
-			
+
 			List<Map<String, Object>> values;
-			
-			while(it.hasNext())
-			{
+
+			while (it.hasNext()) {
 				Object id = it.next();
-				
+
 				values = client.execute("g.v(" + id + ").values()");
-				
-				if(values.contains(suchbegriff))
-				{
-					List<Map<String, Object>> userData = client.execute("g.v(" + id + ").map");
-					
-					Iterator<Map<String, Object>> itUserData = userData.iterator();
-					
-					while(itUserData.hasNext())
-					{
+
+				if (values.contains(suchbegriff)) {
+					List<Map<String, Object>> userData = client.execute("g.v("
+							+ id + ").map");
+
+					Iterator<Map<String, Object>> itUserData = userData
+							.iterator();
+
+					while (itUserData.hasNext()) {
 						Map<String, Object> userDataMap = itUserData.next();
-						
+
 						UserDTO newUser = new UserDTO();
-						
-						newUser.setForename(userDataMap.get("forname").toString());
-						newUser.setSurname(userDataMap.get("surname").toString());
-						newUser.setMailadress(userDataMap.get("mailadress").toString());
+
+						newUser.setForename(userDataMap.get("forname")
+								.toString());
+						newUser.setSurname(userDataMap.get("surname")
+								.toString());
+						newUser.setMailadress(userDataMap.get("mailadress")
+								.toString());
 						newUser.setStreet(userDataMap.get("street").toString());
-						newUser.setHousenumber(userDataMap.get("housenumber").toString());
-						newUser.setPostcode(userDataMap.get("postcode").toString());
+						newUser.setHousenumber(userDataMap.get("housenumber")
+								.toString());
+						newUser.setPostcode(userDataMap.get("postcode")
+								.toString());
 						newUser.setCity(userDataMap.get("city").toString());
-						newUser.setPassword(userDataMap.get("password").toString());
-						newUser.setPicture_up((CommonsMultipartFile) userDataMap.get("picture_up"));
-						
-						coll.add(newUser);						
+						newUser.setPassword(userDataMap.get("password")
+								.toString());
+						newUser.setPicture_up((CommonsMultipartFile) userDataMap
+								.get("picture_up"));
+
+						coll.add(newUser);
 					}
 				}
 			}
@@ -269,28 +301,25 @@ public class TinkerpopDao implements GraphDBInterface {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		disconnect();
 		return coll;
 	}
 
 	@Override
-	public boolean makeFriends(UserDTO user, UserDTO friend) {		
+	public boolean makeFriends(UserDTO user, UserDTO friend) {
 		boolean ret = false;
-		
+
 		Object userId = getVIdByEmail(user);
 		Object friendId = getVIdByEmail(friend);
-		
+
 		try {
-			if(userId != null && friendId != null)
-			{
-				List<Map<String, Object>> results = client.execute(
-						"v1=g.v(" + userId + ");"
-						+ "v2=g.v(" + friendId + ");"
+			if (userId != null && friendId != null) {
+				List<Map<String, Object>> results = client.execute("v1=g.v("
+						+ userId + ");" + "v2=g.v(" + friendId + ");"
 						+ "g.addEdge(v1,v2,'friends')");
-				
-				if(results.size() == 1)
-				{
+
+				if (results.size() == 1) {
 					ret = true;
 				}
 			}
@@ -301,7 +330,7 @@ public class TinkerpopDao implements GraphDBInterface {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		disconnect();
 		return ret;
 	}
@@ -309,17 +338,18 @@ public class TinkerpopDao implements GraphDBInterface {
 	@Override
 	public boolean unfriend(UserDTO user, UserDTO friend) {
 		boolean ret = false;
-		
+
 		Object userId = getVIdByEmail(user);
 		Object friendId = getVIdByEmail(friend);
-		
+
 		try {
-			if(userId != null && friendId != null)
-			{
-				List<Map<String, Object>> results = client.execute("g.v(" + userId + ").outE('friends').as('x').inV.has('email', '" + friend.getMailadress() + "').back('x').remove()");
-				
-				if(results.size() == 1)
-				{
+			if (userId != null && friendId != null) {
+				List<Map<String, Object>> results = client.execute("g.v("
+						+ userId
+						+ ").outE('friends').as('x').inV.has('email', '"
+						+ friend.getMailadress() + "').back('x').remove()");
+
+				if (results.size() == 1) {
 					ret = true;
 				}
 			}
@@ -330,45 +360,99 @@ public class TinkerpopDao implements GraphDBInterface {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		disconnect();
 		return ret;
 	}
 
-	/* List<Map<String, Object>> results = client.execute("g.v(1).outE('knows').inV.outE('created').inV"); */
 	@Override
-	public Collection<UserDTO> findFriendsOfFriends(Collection<UserDTO> friends) {
-		
-		Collection<UserDTO> friendsCollection = new LinkedList<UserDTO>();
-		
-		Iterator<UserDTO> it = friends.iterator();
-		
-		while(it.hasNext())
-		{
-			UserDTO user = it.next();
-			
-			Collection<UserDTO> findFriendsCollection = findFriends(user);
-			
-			Iterator<UserDTO> it2 = findFriendsCollection.iterator();
-			
-			while(it2.hasNext())
-			{
-				friendsCollection.add(it2.next());
-			}
-		}
-		
-		return friendsCollection;
-	}
-
-	@Override
-	public Collection<UserDTO> findRelative(UserDTO user) {
-		
+	public Collection<UserDTO> findFriendsOfFriends(UserDTO user) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 
-  @Override
-  public UserDTO loginUser(LoginDTO login) {
-    // TODO Auto-generated method stub
-    return null;
-  }
+	/*
+	 * List<Map<String, Object>> results =
+	 * client.execute("g.v(1).outE('knows').inV.outE('created').inV");
+	 */
+	// @Override
+	// public Collection<UserDTO> findFriendsOfFriends(Collection<UserDTO>
+	// friends) {
+	//
+	// Collection<UserDTO> friendsCollection = new LinkedList<UserDTO>();
+	//
+	// Iterator<UserDTO> it = friends.iterator();
+	//
+	// while(it.hasNext())
+	// {
+	// UserDTO user = it.next();
+	//
+	// Collection<UserDTO> findFriendsCollection = findFriends(user);
+	//
+	// Iterator<UserDTO> it2 = findFriendsCollection.iterator();
+	//
+	// while(it2.hasNext())
+	// {
+	// friendsCollection.add(it2.next());
+	// }
+	// }
+	//
+	// return friendsCollection;
+	// }
+
+	@Override
+	public Collection<UserDTO> findRelative(UserDTO user) {
+
+		return null;
+	}
+
+	@Override
+	public UserDTO loginUser(LoginDTO login) {
+		System.out.println("#####################################################################");
+		System.out.println(login.toString());
+		
+		if (login.getMailadress() != null && login.getPassword() != null) {
+			
+			try {
+				connect();
+				
+				List<Map<String, Object>> results = client.execute("g.V.has('mailadress', '" + login.getMailadress() + "').has('password', '"	+ login.getPassword() + "').map");
+
+				System.out.println("g.V.has('mailadress', '" + login.getMailadress() + "').has('password', '"	+ login.getPassword() + "').map");
+				
+				Iterator<Map<String, Object>> itUserData = results.iterator();
+
+				while (itUserData.hasNext()) {
+					Map<String, Object> userDataMap = itUserData.next();
+
+					UserDTO newUser = new UserDTO();
+
+					newUser.setForename(userDataMap.get("forname").toString());
+					newUser.setSurname(userDataMap.get("surname").toString());
+					newUser.setMailadress(userDataMap.get("mailadress")
+							.toString());
+					newUser.setStreet(userDataMap.get("street").toString());
+					newUser.setHousenumber(userDataMap.get("housenumber")
+							.toString());
+					newUser.setPostcode(userDataMap.get("postcode").toString());
+					newUser.setCity(userDataMap.get("city").toString());
+					newUser.setPassword(userDataMap.get("password").toString());
+					newUser.setPicture_up((CommonsMultipartFile) userDataMap
+							.get("picture_up"));
+										
+					return newUser;
+				}
+			} catch (RexProException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} finally {
+				disconnect();
+			}
+		}
+		
+		return null;
+	}
 }
