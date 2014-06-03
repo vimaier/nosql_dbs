@@ -2,8 +2,7 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
 	<!-- DTO-Bean-Declaration -->
-	<bean id="LoginDTO" class="de.graphdb.dto.LoginDTO"
-		singleton="false" />
-		<bean id="UserDTO" class="de.graphdb.dto.UserDTO"
-		singleton="false" />
+	<bean id="LoginDTO" class="de.graphdb.dto.LoginDTO" singleton="false" />
+	<bean id="UserDTO" class="de.graphdb.dto.UserDTO" singleton="false" />
+	<bean id="UserIndexForm" class="de.graphdb.form.UserIndexForm" singleton="false" />
 </beans>
