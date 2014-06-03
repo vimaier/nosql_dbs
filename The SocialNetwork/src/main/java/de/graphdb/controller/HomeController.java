@@ -1,5 +1,8 @@
 package de.graphdb.controller;
 
+import java.util.Collection;
+import java.util.LinkedList;
+
 import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
@@ -56,7 +59,7 @@ public class HomeController {
 
   @ModelAttribute("UserIndexForm")
   public UserIndexForm createUserindexForm() {
-    return (UserIndexForm) context.getBean("UserindexForm");
+    return (UserIndexForm) context.getBean("UserIndexForm");
   }
 
   @RequestMapping(value = "Home.do")
@@ -131,19 +134,36 @@ public class HomeController {
       @RequestParam(value = "id", required = false) String id) {
     logger.info("***** UserIndex");
     UserIndexForm uform = createUserindexForm();
+    UserDTO user;
     if (id == null || id.isEmpty()) {
-      UserDTO currUser = (UserDTO) session.getAttribute("activeUser");
-      if (currUser != null && currUser.getId() != null
-          && !currUser.getId().isEmpty()) {
-        id = currUser.getId();
-        uform.setUser(currUser);
+      user = (UserDTO) session.getAttribute("activeUser");
+      if (user != null && user.getId() != null && !user.getId().isEmpty()) {
+        id = user.getId();
+        uform.setUser(user);
       } else {
         return "redirect:Index.do";
       }
     } else {
-      uform.setUser(db.getUserById(id));
+      user = db.getUserById(id);
+      uform.setUser(user);
     }
-    uform.setFriends(db.findFriends(user));
+    // uform.setFriends(db.findFriends(user));
+    /**
+     * TestDATEN
+     */
+    Collection<UserDTO> testlauf = new LinkedList<UserDTO>();
+    for (int i = 0; i <= 10; i++) {
+      UserDTO usertest = createUserDTO();
+      usertest.setId("9:2");
+      usertest.setForename("Deine");
+      usertest.setSurname("Mudda");
+      testlauf.add(usertest);
+    }
+    /**
+     * 
+     */
+    uform.setFriends(testlauf);
+    model.put("UserIndexForm", uform);
     return "userindex";
   }
 
