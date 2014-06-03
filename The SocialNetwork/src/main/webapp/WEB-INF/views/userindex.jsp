@@ -107,6 +107,17 @@
 					<h4>
 						<fmt:message key="friends.of.friends" />
 					</h4>
+					<c:forEach items="${UserIndexForm.friendsoffriends}" var="fof">
+					<div class="friendpicmini"
+							onclick="location.href='UserIndex.do?id=${fof.id}';">
+							<img alt="" src="resources/images/profile.jpg">
+							<div>
+								<c:out value="${fof.forename}" />
+								&nbsp;
+								<c:out value="${fof.surname}" />
+							</div>
+						</div>
+					</c:forEach>
 				</div>
 			</c:when>
 			<c:otherwise>

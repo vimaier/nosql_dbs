@@ -624,6 +624,7 @@ ol li .send {
 	border-radius: 20px;
 	border: 1px solid #c0c0c0;
 	text-align: center;
+	cursor: pointer;
 }
 
 .friendpic img {
@@ -633,5 +634,27 @@ ol li .send {
 }
 
 .friendpic div {
+	margin: auto;
+}
+
+.friendpicmini {
+	width: 90px;
+	height: 120px;
+	margin: 0px 0px 10px 10px;
+	float: left;
+	display: block;
+	border-radius: 20px;
+	border: 1px solid #c0c0c0;
+	text-align: center;
+	cursor: pointer;
+}
+
+.friendpicmini img {
+	width: 90px;
+	height: 100px;
+	border-radius: 20px 20px 0px 0px;
+}
+
+.friendpicmini div {
 	margin: auto;
 }

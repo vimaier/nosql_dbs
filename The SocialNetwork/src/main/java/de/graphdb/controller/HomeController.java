@@ -4,7 +4,6 @@ import java.util.Collection;
 
 import javax.servlet.http.HttpSession;
 
-import org.crsh.shell.impl.command.system.repl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.InvalidPropertyException;
@@ -160,6 +159,7 @@ public class HomeController {
         && friends.contains(db.getUserById(currUser.getId()))) {
       model.put("isFriend", true);
     }
+    uform.setFriendsoffriends(db.findFriendsOfFriends(user));
     uform.setFriends(friends);
     model.put("UserIndexForm", uform);
     return "userindex";
