@@ -208,6 +208,8 @@ public class HomeController {
     UserDTO currUser = uform.getUser();
     if (currUser != null && !currUser.getId().isEmpty()) {
       db.deleteUser(currUser);
+      session.removeAttribute("activeUser");
+      model.put("UserDTO", createUserDTO());
     }
     return "redirect:/";
   }
