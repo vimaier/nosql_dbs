@@ -148,7 +148,6 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 
 	@Override
 	public Collection<UserDTO> findFriends(UserDTO user) {
-		//FIXME: this is not correct... should be a search over all nodes (vimaier)
 		final String queryString = "match (u:"+UserDTO.LABEL+")-[:" + RELATIONSHIPS.FRIENDS + "]->(f:"+UserDTO.LABEL+")" +
 				"where u.mailaddress = {ref_mailaddress} return f";
         final Iterator<Node> resultIter = getQueryEngine().query(queryString, MapUtil.map("ref_mailaddress", user.getMailadress())).to(Node.class).iterator();
@@ -167,6 +166,7 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 	 */
 	public Collection<UserDTO> findUsers(String suchbegriff) {
 		final String mailaddress = suchbegriff;
+		//FIXME: this is not correct... should be a search over all nodes (vimaier)
 		final String queryString = "match (u:"+UserDTO.LABEL+") where u.mailaddress = {ref_mailaddress} return u";
         final Iterator<Node> resultIter = getQueryEngine().query(queryString, MapUtil.map("ref_mailaddress", mailaddress)).to(Node.class).iterator();
         
