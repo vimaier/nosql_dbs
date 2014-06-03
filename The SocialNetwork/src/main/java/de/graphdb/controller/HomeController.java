@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import javax.servlet.http.HttpSession;
 
+import org.crsh.shell.impl.command.system.repl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.InvalidPropertyException;
@@ -20,11 +21,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.context.request.WebRequest;
 
-import com.sun.jna.platform.win32.Netapi32Util.User;
-
 import de.graphdb.db.orientdb.OrientDbDao;
 import de.graphdb.dto.LoginDTO;
 import de.graphdb.dto.UserDTO;
+import de.graphdb.form.SearchForm;
 import de.graphdb.form.UserIndexForm;
 
 /**
@@ -63,6 +63,11 @@ public class HomeController {
     return (UserIndexForm) context.getBean("UserIndexForm");
   }
 
+  @ModelAttribute("SearchForm")
+  public SearchForm createSearchForm() {
+    return (SearchForm) context.getBean("SearchForm");
+  }
+
   @RequestMapping(value = "Home.do")
   public String home(ModelMap model) {
     UserDTO currUser = (UserDTO) session.getAttribute("activeUser");
@@ -76,6 +81,7 @@ public class HomeController {
   public String homeLoggedIn(ModelMap model) {
     model.put("UserDTO", createUserDTO());
     model.put("LoginDTO", createLoginDTO());
+    model.put("SearchForm", createSearchForm());
     return "index";
   }
 
@@ -150,8 +156,8 @@ public class HomeController {
       uform.setUser(user);
     }
     Collection<UserDTO> friends = db.findFriends(user);
-    if (friends != null && friends.contains(db.getUserById(currUser.getId()))) {
-      System.out.println("*****************");
+    if (friends != null && currUser != null
+        && friends.contains(db.getUserById(currUser.getId()))) {
       model.put("isFriend", true);
     }
     uform.setFriends(friends);
@@ -203,7 +209,14 @@ public class HomeController {
     if (currUser != null && !currUser.getId().isEmpty()) {
       db.deleteUser(currUser);
     }
-    return "redirect:UserIndex.do?id=" + uform.getUser().getId();
+    return "redirect:/";
+  }
+
+  @RequestMapping(value = "Search.do")
+  public String search(ModelMap model,
+      @ModelAttribute("SearchForm") SearchForm sform) {
+    sform.setResult(db.findUsers(sform.getSearch()));
+    return "searchresult";
   }
 
   /**

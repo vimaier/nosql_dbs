@@ -11,11 +11,11 @@
 				<div id="overlay"></div>
 				<!--searchform -->
 				<div class="search">
-					<sf:form action="Search.do" commandName="UserDTO">
-						<span> <sf:input type="text" value="Search..."
-								path="surname" id="s" /> <input name="searchsubmit"
-							type="image" src="resources/images/search.gif" value="Go"
-							id="searchsubmit" class="btn" />
+					<sf:form action="Search.do" commandName="SearchForm">
+						<span> <sf:input path="search" id="s" /><input
+							name="searchsubmit" type="image"
+							src="resources/images/search.gif" value="Go" id="searchsubmit"
+							class="btn" />
 						</span>
 					</sf:form>
 					<!--/searchform -->
