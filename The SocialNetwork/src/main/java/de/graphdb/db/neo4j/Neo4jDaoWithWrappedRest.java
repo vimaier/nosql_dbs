@@ -11,6 +11,8 @@ import org.neo4j.rest.graphdb.RestAPI;
 import org.neo4j.rest.graphdb.RestGraphDatabase;
 import org.neo4j.rest.graphdb.query.QueryEngine;
 import org.neo4j.rest.graphdb.query.RestCypherQueryEngine;
+import org.neo4j.rest.graphdb.util.ConvertedResult;
+import org.neo4j.rest.graphdb.util.QueryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,13 +78,26 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 			}
 		return queryEngine;
 	}
+	
 
+	private final String INSERT_USER_QUERY = "CREATE (u:" + UserDTO.LABEL +
+			" {forename:{ref_forename}, surname:{ref_surename}, street:{ref_street}, housenumber:{ref_housenumber}, " +
+			"mailaddress:{ref_mailaddress}, postcode:{ref_postcode}, city:{ref_city}, password:{ref_password}}) RETURN u";
 	@Override
 	public boolean insertUser(UserDTO user) {
+		if (null == user.getMailadress()){
+			log.error("Tried to insert a user but mailaddress is null User: "+user.toString());
+			return false;
+		}
 		try{
-			
-			String statement = getInsertCypherQuery(user);
-			getQueryEngine().query(statement, null);
+			Iterator<Node> resIterator = getQueryEngine().query(INSERT_USER_QUERY, 
+					MapUtil.map("ref_forename", user.getForename(), "ref_surename", user.getSurname(),
+							"ref_street", user.getStreet(), "ref_housenumber", user.getHousenumber(),
+							"ref_postcode", user.getPostcode(), "ref_city", user.getCity(),
+							"ref_password", user.getPassword(), "ref_mailaddress", user.getMailadress()
+					)).to(Node.class).iterator();
+			Node createdNode = resIterator.next();
+			user.setId(Long.toString(createdNode.getId()));
 		}catch(Exception exc) {
 			log.error(
 					String.format("Could not insert user:'%s' Exception: %s", 
@@ -133,6 +148,7 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 
 	@Override
 	public Collection<UserDTO> findFriends(UserDTO user) {
+		//FIXME: this is not correct... should be a search over all nodes (vimaier)
 		final String queryString = "match (u:"+UserDTO.LABEL+")-[:" + RELATIONSHIPS.FRIENDS + "]->(f:"+UserDTO.LABEL+")" +
 				"where u.mailaddress = {ref_mailaddress} return f";
         final Iterator<Node> resultIter = getQueryEngine().query(queryString, MapUtil.map("ref_mailaddress", user.getMailadress())).to(Node.class).iterator();
@@ -217,39 +233,8 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 	}
 	
 	
-	public String getInsertCypherQuery(UserDTO u) {
-		if (u.getMailadress() == null)
-			return null;
-
-		StringBuilder sb = new StringBuilder();
-		
-		//TODO: We should switch from hardcoded strings to variables (vimaier)
-		sb.append("create (u:" + UserDTO.LABEL + "{");
-		if (u.getForename() != null)
-			sb.append("forename: '" + u.getForename() + "',");
-		if (u.getSurname() != null)
-			sb.append("surname: '" + u.getSurname() + "',");
-		if (u.getMailadress() != null)
-			sb.append("mailaddress: '" + u.getMailadress() + "',");
-		if (u.getStreet() != null)
-			sb.append("street: '" + u.getStreet() + "',");
-		if (u.getHousenumber() != null)
-			sb.append("housenumber: '" + u.getHousenumber() + "',");
-		if (u.getPostcode() != null)
-			sb.append("postcode: '" + u.getPostcode() + "',");
-		if (u.getCity() != null)
-			sb.append("city: '" + u.getCity() + "',");
-		if (u.getPassword() != null)
-			sb.append("password: '" + u.getPassword() + "',");
-		sb.deleteCharAt(sb.length() - 1);
-		sb.append(" }) return u");
-
-		return sb.toString();
-	}
-	
-
 	private UserDTO createUserFromNode(Node node) {
-		return new UserDTO( (String) node.getProperty("forename", ""), 
+		UserDTO userDTO = new UserDTO( (String) node.getProperty("forename", ""), 
 				(String) node.getProperty("surname", ""), 
 				(String) node.getProperty("mailaddress", ""), 
 				(String) node.getProperty("street", ""), 
@@ -259,6 +244,9 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 				(String) node.getProperty("password", ""), 
 				null // We did not load the picture here (vimaier)
 				);
+		userDTO.setId( Long.toString(node.getId()) );
+		
+		return userDTO;
 	}
 
   @Override
@@ -282,6 +270,22 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
       }
      return foundUsers.iterator().next();
   }
+
+	private final String GET_NODE_BY_ID_QUERY = "START n=node({r_id}) RETURN n";
+	@Override
+	public UserDTO getUserById(String id) {
+		try{
+			QueryResult<?> queryResult = getQueryEngine().query(GET_NODE_BY_ID_QUERY, MapUtil.map("r_id", Long.parseLong(id)) );
+			ConvertedResult<Node> convertedResult = queryResult.to(Node.class);
+			Iterator<Node> iterator = convertedResult.iterator();
+			if(iterator.hasNext())
+				return createUserFromNode(iterator.next());
+		}catch(Exception exc) {
+			log.error(String.format("Exception in getting user by id(%s); Exception: %s", id, exc.toString())); 
+			return null;
+		}
+		return null;
+	}
 }
 
 
