@@ -97,5 +97,12 @@ public interface GraphDBInterface {
    * @return UserDTO
    */
   public UserDTO loginUser(LoginDTO login);
+  
+  /**
+   * 
+   * @param id String
+   * @return UserDTO
+   */
+  public UserDTO getUserById(String id);
 
 }

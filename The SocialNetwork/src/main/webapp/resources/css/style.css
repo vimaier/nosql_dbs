@@ -559,39 +559,39 @@ ol li .send {
 	clear: both;
 }
 
-#loginfade label{
+#loginfade label {
 	text-align: right;
 	padding-left: 30px;
 	position: relative;
 	top: 10px;
 }
 
-#loginfade label{
+#loginfade label {
 	font-weight: bold;
 }
 
-#registerfade label{
+#registerfade label {
 	text-align: right;
 	padding-left: 30px;
 	position: relative;
 	top: 10px;
 }
 
-#registerfade label{
+#registerfade label {
 	font-weight: bold;
 }
 
-.width300{
+.width300 {
 	width: 200px;
 }
 
-.width150{
+.width150 {
 	width: 100px;
 	text-align: right;
 	font-weight: bold;
 }
 
-#userindexleft{
+#userindexleft {
 	width: 315px;
 	border: 1px solid #c0c0c0;
 	padding: 20px 0px 20px 0px;
@@ -600,11 +600,20 @@ ol li .send {
 	float: left;
 }
 
-#userindexright{
+#userindexright {
 	width: 585px;
 	border: 1px solid #c0c0c0;
 	padding: 20px 0px 20px 0px;
 	border-radius: 20px;
 	margin-top: 20px;
 	float: right;
+}
+
+.friendpic {
+	width: 180px;
+	height: 240px;
+	border-radius: 20px;
+	border: 1px solid #c0c0c0;
+	margin: 0px 0px 10px 10px;
+	float: left;
 }

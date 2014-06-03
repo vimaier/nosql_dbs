@@ -173,6 +173,7 @@ public class OrientDbDao implements GraphDBInterface
 		return null;
 	}
 
+	@Override
 	public UserDTO getUserById(String id)
 	{
 		if(id == null || id.isEmpty())
