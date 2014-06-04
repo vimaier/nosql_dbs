@@ -30,7 +30,7 @@ public class TinkerpopDao implements GraphDBInterface {
 													// database
 
 	// Connect to Rexster-client
-	private void connect() {
+	public void connect() {
 		try {
 			if (clientStatus == false) {
 				clientStatus = true;
@@ -42,7 +42,7 @@ public class TinkerpopDao implements GraphDBInterface {
 	}
 
 	// Disconnect connection to Rexster
-	private void disconnect() {
+	public void disconnect() {
 		try {
 			client.close();
 			clientStatus = false;
@@ -51,11 +51,41 @@ public class TinkerpopDao implements GraphDBInterface {
 		}
 	}
 
+	public UserDTO mapToUserDTO(Map<String, Object> currMap)
+	{
+		UserDTO newUser = new UserDTO();
+
+		if (currMap.get("forname") != null)
+			newUser.setForename(currMap.get("forname").toString());
+		if (currMap.get("surname") != null)
+			newUser.setSurname(currMap.get("surname").toString());
+		if (currMap.get("mailadress") != null)
+		{
+			newUser.setMailadress(currMap.get("mailadress").toString());
+			newUser.setId(getVIdByEmail(newUser).toString());
+		}
+		if (currMap.get("street") != null)
+			newUser.setStreet(currMap.get("street").toString());
+		if (currMap.get("housenumber") != null)
+			newUser.setHousenumber(currMap.get("housenumber").toString());
+		if (currMap.get("postcode") != null)
+			newUser.setPostcode(currMap.get("postcode").toString());
+		if (currMap.get("city") != null)
+			newUser.setCity(currMap.get("city").toString());
+		if (currMap.get("password") != null)
+			newUser.setPassword(currMap.get("password").toString());
+		if (currMap.get("picture_up") != null)
+			newUser.setPicture_up((CommonsMultipartFile) currMap
+					.get("picture_up"));
+
+		return newUser;
+	}
+	
 	/**
 	 * Get the Id of a User by email-adress
 	 * @param user
 	 * @return 
-	 */
+	 */	
 	private Object getVIdByEmail(UserDTO user) {
 		List<Map<String, Object>> results;
 		Object id = null;
@@ -77,11 +107,16 @@ public class TinkerpopDao implements GraphDBInterface {
 
 		return id;
 	}
+	
+	@Override
+	public UserDTO getUserById(String id) {
+		return null;
+	}
 
 	@Override
 	public boolean insertUser(UserDTO user) {
 		boolean ret = false;
-
+		System.out.println("----------------------------------------------------------------------- BIN DRIN");
 		try {
 			connect();
 
@@ -122,6 +157,8 @@ public class TinkerpopDao implements GraphDBInterface {
 						ret = true;
 					}
 				}
+				
+				System.out.println("----------------------------------------------------------------------- BUILD STRING");
 			}
 
 			disconnect();
@@ -130,7 +167,7 @@ public class TinkerpopDao implements GraphDBInterface {
 			System.out.println(e.toString());
 			disconnect();
 		}
-
+		System.out.println("----------------------------------------------------------------------- ENDE INSERT");
 		return ret;
 	}
 
@@ -138,9 +175,10 @@ public class TinkerpopDao implements GraphDBInterface {
 	public UserDTO updateUser(UserDTO user) {
 		UserDTO userRet = user;
 		Object id = getVIdByEmail(user);
-		
-		System.out.println("#######################################################" + id);
 
+		// Setze Id im UserId
+		userRet.setId(id.toString());
+		
 		try {
 			if (id != null) {
 				if (user.getForename() != null)
@@ -148,20 +186,15 @@ public class TinkerpopDao implements GraphDBInterface {
 				if (user.getSurname() != null)
 					client.execute("g.v(" + id + ").surname='" + user.getSurname() + "'");
 				if (user.getStreet() != null)
-					client.execute("g.v(" + id + ").street='"
-							+ user.getStreet() + "'");
+					client.execute("g.v(" + id + ").street='" + user.getStreet() + "'");
 				if (user.getHousenumber() != null)
-					client.execute("g.v(" + id + ").housenumber='"
-							+ user.getHousenumber() + "'");
+					client.execute("g.v(" + id + ").housenumber='" + user.getHousenumber() + "'");
 				if (user.getPostcode() != null)
-					client.execute("g.v(" + id + ").postcode='"
-							+ user.getPostcode() + "'");
+					client.execute("g.v(" + id + ").postcode='"	+ user.getPostcode() + "'");
 				if (user.getCity() != null)
-					client.execute("g.v(" + id + ").city='" + user.getCity()
-							+ "'");
+					client.execute("g.v(" + id + ").city='" + user.getCity() + "'");
 				if (user.getPassword() != null)
-					client.execute("g.v(" + id + ").password='"
-							+ user.getPassword() + "'");
+					client.execute("g.v(" + id + ").password='"	+ user.getPassword() + "'");
 			} else {
 				userRet = null;
 			}
@@ -200,6 +233,7 @@ public class TinkerpopDao implements GraphDBInterface {
 
 		return ret;
 	}
+	
 
 	@Override
 	public Collection<UserDTO> findFriends(UserDTO user) {
@@ -216,19 +250,33 @@ public class TinkerpopDao implements GraphDBInterface {
 			while (it.hasNext()) {
 				Map<String, Object> currMap = it.next();
 
-				UserDTO newUser = new UserDTO();
-
-				newUser.setForename(currMap.get("forname").toString());
-				newUser.setSurname(currMap.get("surname").toString());
-				newUser.setMailadress(currMap.get("mailadress").toString());
-				newUser.setStreet(currMap.get("street").toString());
-				newUser.setHousenumber(currMap.get("housenumber").toString());
-				newUser.setPostcode(currMap.get("postcode").toString());
-				newUser.setCity(currMap.get("city").toString());
-				newUser.setPassword(currMap.get("password").toString());
-				newUser.setPicture_up((CommonsMultipartFile) currMap
-						.get("picture_up"));
-
+				
+//				UserDTO newUser = new UserDTO();
+//
+//				if (currMap.get("forname") != null)
+//					newUser.setForename(currMap.get("forname").toString());
+//				if (currMap.get("surname") != null)
+//					newUser.setSurname(currMap.get("surname").toString());
+//				if (currMap.get("mailadress") != null)
+//				{
+//					newUser.setMailadress(currMap.get("mailadress").toString());
+//					newUser.setId(getVIdByEmail(newUser).toString());
+//				}
+//				if (currMap.get("street") != null)
+//					newUser.setStreet(currMap.get("street").toString());
+//				if (currMap.get("housenumber") != null)
+//					newUser.setHousenumber(currMap.get("housenumber").toString());
+//				if (currMap.get("postcode") != null)
+//					newUser.setPostcode(currMap.get("postcode").toString());
+//				if (currMap.get("city") != null)
+//					newUser.setCity(currMap.get("city").toString());
+//				if (currMap.get("password") != null)
+//					newUser.setPassword(currMap.get("password").toString());
+//				if (currMap.get("picture_up") != null)
+//					newUser.setPicture_up((CommonsMultipartFile) currMap
+//							.get("picture_up"));
+				
+				UserDTO newUser = mapToUserDTO(currMap);
 				coll.add(newUser);
 			}
 
@@ -240,6 +288,8 @@ public class TinkerpopDao implements GraphDBInterface {
 			e.printStackTrace();
 		}
 
+		
+		
 		return coll;
 	}
 
@@ -262,8 +312,7 @@ public class TinkerpopDao implements GraphDBInterface {
 				values = client.execute("g.v(" + id + ").values()");
 
 				if (values.contains(suchbegriff)) {
-					List<Map<String, Object>> userData = client.execute("g.v("
-							+ id + ").map");
+					List<Map<String, Object>> userData = client.execute("g.v(" + id + ").map");
 
 					Iterator<Map<String, Object>> itUserData = userData
 							.iterator();
@@ -271,26 +320,8 @@ public class TinkerpopDao implements GraphDBInterface {
 					while (itUserData.hasNext()) {
 						Map<String, Object> userDataMap = itUserData.next();
 
-						UserDTO newUser = new UserDTO();
-
-						newUser.setForename(userDataMap.get("forname")
-								.toString());
-						newUser.setSurname(userDataMap.get("surname")
-								.toString());
-						newUser.setMailadress(userDataMap.get("mailadress")
-								.toString());
-						newUser.setStreet(userDataMap.get("street").toString());
-						newUser.setHousenumber(userDataMap.get("housenumber")
-								.toString());
-						newUser.setPostcode(userDataMap.get("postcode")
-								.toString());
-						newUser.setCity(userDataMap.get("city").toString());
-						newUser.setPassword(userDataMap.get("password")
-								.toString());
-						newUser.setPicture_up((CommonsMultipartFile) userDataMap
-								.get("picture_up"));
-
-						coll.add(newUser);
+						UserDTO findUser = mapToUserDTO(userDataMap);
+						coll.add(findUser);
 					}
 				}
 			}
@@ -338,17 +369,20 @@ public class TinkerpopDao implements GraphDBInterface {
 	@Override
 	public boolean unfriend(UserDTO user, UserDTO friend) {
 		boolean ret = false;
-
+		
 		Object userId = getVIdByEmail(user);
 		Object friendId = getVIdByEmail(friend);
 
 		try {
+			connect();
+			
 			if (userId != null && friendId != null) {
-				List<Map<String, Object>> results = client.execute("g.v("
-						+ userId
-						+ ").outE('friends').as('x').inV.has('email', '"
-						+ friend.getMailadress() + "').back('x').remove()");
-
+				List<Map<String, Object>> results = client.execute(
+						"g.v(" + userId	+ ")."
+								+ "outE('friends').as('x')."
+								+ "inV.has('mailadress', '" + friend.getMailadress() + "')."
+								+ "back('x').remove()");
+				
 				if (results.size() == 1) {
 					ret = true;
 				}
