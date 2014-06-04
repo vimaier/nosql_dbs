@@ -88,8 +88,9 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 
 		try {
 			Iterator<Node> resIterator = getQueryEngine()
-					.query(getInsertCypherQuery(user),getCypherQueryMapUser(user))
-					.to(Node.class).iterator();
+					.query(getInsertCypherQuery(user),
+							getCypherQueryMapUser(user)).to(Node.class)
+					.iterator();
 			Node createdNode = resIterator.next();
 			user.setId(Long.toString(createdNode.getId()));
 		} catch (Exception exc) {
@@ -108,9 +109,10 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 					+ user.toString());
 			return null;
 		}
-		
+
 		try {
-			getQueryEngine().query(getUpdateCypherQuery(user), getCypherQueryMapUser(user));
+			getQueryEngine().query(getUpdateCypherQuery(user),
+					getCypherQueryMapUser(user));
 		} catch (Exception exc) {
 			log.error(String.format("Could not update user:'%s' Exception: %s",
 					user.toString(), exc.toString()));
@@ -126,16 +128,17 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 					+ user.toString());
 			return false;
 		}
-		
+
 		try {
 			getQueryEngine().query(getDeleteCypherQuery(true),
 					MapUtil.map("ref_mailadress", user.getMailadress()));
 		} catch (Exception exc) {
-			try{
+			try {
 				getQueryEngine().query(getDeleteCypherQuery(false),
 						MapUtil.map("ref_mailadress", user.getMailadress()));
 			} catch (Exception ex) {
-				log.error(String.format("Could not delete user:'%s' Exception: %s",
+				log.error(String.format(
+						"Could not delete user:'%s' Exception: %s",
 						user.toString(), exc.toString()));
 				return false;
 			}
@@ -152,18 +155,19 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 		}
 
 		Iterator<Node> resultIter = null;
-		try{
+		try {
 			resultIter = getQueryEngine()
 					.query(getFindFriendsCypherQuery(user),
 							MapUtil.map("ref_mailadress", user.getMailadress()))
 					.to(Node.class).iterator();
-		} catch (Exception ex){
-			log.error(String.format("Could not find friends of a user:'%s' Exception: %s",
+		} catch (Exception ex) {
+			log.error(String.format(
+					"Could not find friends of a user:'%s' Exception: %s",
 					user.toString(), ex.toString()));
 			return null;
 		}
-		
-		if(resultIter == null)
+
+		if (resultIter == null)
 			return null;
 
 		Collection<UserDTO> friends = new ArrayList<UserDTO>();
@@ -171,37 +175,35 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 			Node node = resultIter.next();
 			friends.add(createUserFromNode(node));
 		}
-		
+
 		return friends;
 	}
 
-	@Override
 	/**
-	 * @param "suchbegriff" sucht in:
-	 * mailadress
-	 * surname
-	 * forename
+	 * @param "suchbegriff" sucht in: mailadress surname forename
+	 * @Override
 	 */
 	public Collection<UserDTO> findUsers(String suchbegriff) {
-		if(suchbegriff.length() < 1)
+		if (suchbegriff.length() < 1)
 			return null;
-		
-		String searchterm = "(?i)"+suchbegriff+".*";
-		
+
+		String searchterm = "(?i)" + suchbegriff + ".*";
+
 		Iterator<Node> resultIter = null;
-		try{
+		try {
 			resultIter = getQueryEngine()
-				.query(getFindUsersCypherQuery(),
-						MapUtil.map("ref_mailadress", searchterm,
-								"ref_forename", searchterm, "ref_surname",
-								searchterm)).to(Node.class).iterator();
-		} catch (Exception ex){
-			log.error(String.format("Could not find Users to the given searchterm:'%s' Exception: %s",
-					suchbegriff, ex.toString()));
+					.query(getFindUsersCypherQuery(),
+							MapUtil.map("ref_mailadress", searchterm,
+									"ref_forename", searchterm, "ref_surname",
+									searchterm)).to(Node.class).iterator();
+		} catch (Exception ex) {
+			log.error(String
+					.format("Could not find Users to the given searchterm:'%s' Exception: %s",
+							suchbegriff, ex.toString()));
 			return null;
 		}
-		
-		if(resultIter == null)
+
+		if (resultIter == null)
 			return null;
 
 		Collection<UserDTO> foundUsers = new ArrayList<UserDTO>();
@@ -216,12 +218,13 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 	public boolean makeFriends(UserDTO user, UserDTO friend) {
 		if (null == user.getMailadress() || null == friend.getMailadress()) {
 			log.error("Tried to make friends of two users but mailadress is null. User1: "
-					+ user.toString()+", User2: "+friend.toString());
+					+ user.toString() + ", User2: " + friend.toString());
 			return false;
 		}
-		
+
 		try {
-			getQueryEngine().query(getMakeFriendsCypherQuery(),
+			getQueryEngine().query(
+					getMakeFriendsCypherQuery(),
 					MapUtil.map("r_mail_1", user.getMailadress(), "r_mail_2",
 							friend.getMailadress(), "r_since", Calendar
 									.getInstance().getTime().toString()));
@@ -239,10 +242,10 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 	public boolean unfriend(UserDTO user, UserDTO friend) {
 		if (null == user.getMailadress() || null == friend.getMailadress()) {
 			log.error("Tried to unfriend two users but mailadress is null. User1: "
-					+ user.toString()+", User2: "+friend.toString());
+					+ user.toString() + ", User2: " + friend.toString());
 			return false;
 		}
-		
+
 		try {
 			getQueryEngine().query(
 					getUnfriendCypherQuery(),
@@ -265,21 +268,22 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 					+ user.toString());
 			return null;
 		}
-		
+
 		Iterator<Node> resultIter = null;
-		
-		try{
+
+		try {
 			resultIter = getQueryEngine()
 					.query(getFindFriendsOfFriendsCypherQuery(),
 							MapUtil.map("ref_mailadress", user.getMailadress()))
 					.to(Node.class).iterator();
-		} catch (Exception ex){
-			log.error(String.format("Could not find friends of friends to the given User:'%s' Exception: %s",
-					user.toString(), ex.toString()));
+		} catch (Exception ex) {
+			log.error(String
+					.format("Could not find friends of friends to the given User:'%s' Exception: %s",
+							user.toString(), ex.toString()));
 			return null;
 		}
-		
-		if(resultIter == null)
+
+		if (resultIter == null)
 			return null;
 
 		Collection<UserDTO> friendsOfFriends = new ArrayList<UserDTO>();
@@ -321,23 +325,24 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 			log.error("Tried to login user but mailadress is null User: "
 					+ login.toString());
 			return null;
-		}		
-		
+		}
+
 		Iterator<Node> resultIter = null;
-		
-		try{
+
+		try {
 			resultIter = getQueryEngine()
-				.query(getLoginUserCypherQuery(),
-						MapUtil.map("ref_mailadress", login.getMailadress(),
-								"ref_password", login.getPassword()))
-				.to(Node.class).iterator();
-		} catch (Exception ex){
+					.query(getLoginUserCypherQuery(),
+							MapUtil.map("ref_mailadress",
+									login.getMailadress(), "ref_password",
+									login.getPassword())).to(Node.class)
+					.iterator();
+		} catch (Exception ex) {
 			log.error(String.format("Could not login User:'%s' Exception: %s",
 					login.toString(), ex.toString()));
 			return null;
 		}
-		
-		if(resultIter == null)
+
+		if (resultIter == null)
 			return null;
 
 		Collection<UserDTO> foundUsers = new ArrayList<UserDTO>();
@@ -393,7 +398,16 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 
 		return result;
 	}
-	
+
+	/**
+	 * CREATE (u:USER { mailadress:{ref_mailadress}, password:{ref_password},
+	 * forename:{ref_forename}, surname:{ref_surename}, street:{ref_street},
+	 * housenumber:{ref_housenumber}, postcode:{ref_postcode}, city:{ref_city}
+	 * }) return u
+	 * 
+	 * @param user
+	 * @return
+	 */
 	private String getInsertCypherQuery(UserDTO user) {
 		StringBuilder sb = new StringBuilder();
 
@@ -419,10 +433,21 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 		return sb.toString();
 	}
 
-	private String getUpdateCypherQuery(UserDTO user){
+	/**
+	 * MATCH (u:USER) WHERE u.mailadress={ref_mailadress} SET
+	 * u.password={ref_password}, u.forename={ref_forename},
+	 * u.surname={ref_surename}, u.street={ref_street},
+	 * u.housenumber={ref_housenumber}, u.postcode={ref_postcode},
+	 * u.city={ref_city} return u
+	 * 
+	 * @param user
+	 * @return
+	 */
+	private String getUpdateCypherQuery(UserDTO user) {
 		StringBuilder sb = new StringBuilder();
-		
-		sb.append("MATCH (u:"+ UserDTO.LABEL+ ") WHERE u.mailadress={ref_mailadress} SET ");
+
+		sb.append("MATCH (u:" + UserDTO.LABEL
+				+ ") WHERE u.mailadress={ref_mailadress} SET ");
 		if (user.getPassword() != null && !user.getPassword().equals(""))
 			sb.append("u.password={ref_password},");
 		if (user.getForename() != null && !user.getForename().equals(""))
@@ -437,83 +462,134 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 			sb.append("u.postcode={ref_postcode},");
 		if (user.getCity() != null && !user.getCity().equals(""))
 			sb.append("u.city={ref_city},");
-		sb.deleteCharAt(sb.length()-1);
+		sb.deleteCharAt(sb.length() - 1);
 		sb.append(" return u");
-		
+
 		return sb.toString();
 	}
 
-	private String getDeleteCypherQuery(boolean withEdges){
+	/**
+	 * if(withEdges) MATCH (n:USER) WHERE n.mailadress={ref_mailadress} OPTIONAL
+	 * MATCH (n)-[r]-() DELETE n,r else MATCH (n:USER) WHERE
+	 * n.mailadress={ref_mailadress} DELETE n
+	 * 
+	 * @param withEdges
+	 * @return
+	 */
+	private String getDeleteCypherQuery(boolean withEdges) {
 		StringBuilder sb = new StringBuilder();
-		
-		if(withEdges)
-			sb.append("MATCH (n:"+ UserDTO.LABEL+ ") WHERE n.mailadress={ref_mailadress} OPTIONAL MATCH (n)-[r]-() DELETE n,r");
+
+		if (withEdges)
+			sb.append("MATCH (n:"
+					+ UserDTO.LABEL
+					+ ") WHERE n.mailadress={ref_mailadress} OPTIONAL MATCH (n)-[r]-() DELETE n,r");
 		else
-			sb.append("MATCH (n:"+ UserDTO.LABEL+ ") WHERE n.mailadress={ref_mailadress} DELETE n");
-		
+			sb.append("MATCH (n:" + UserDTO.LABEL
+					+ ") WHERE n.mailadress={ref_mailadress} DELETE n");
+
 		return sb.toString();
 	}
-	
-	private String getFindFriendsCypherQuery(UserDTO user){
+
+	/**
+	 * match (u:USER)-[:FRIENDS]-(f:USER) where u.mailadress = {ref_mailadress}
+	 * return f
+	 * 
+	 * @param user
+	 * @return
+	 */
+	private String getFindFriendsCypherQuery(UserDTO user) {
 		StringBuilder sb = new StringBuilder();
-		
-		sb.append("match (u:" + UserDTO.LABEL + ")-[:"+ RELATIONSHIPS.FRIENDS + "]-(f:"+ UserDTO.LABEL + ")");
+
+		sb.append("match (u:" + UserDTO.LABEL + ")-[:" + RELATIONSHIPS.FRIENDS
+				+ "]-(f:" + UserDTO.LABEL + ")");
 		sb.append("where u.mailadress = {ref_mailadress} return f");
-		
-		return sb.toString();		
+
+		return sb.toString();
 	}
-	
-	private String getFindUsersCypherQuery(){
+
+	/**
+	 * match (u:USER) where u.mailadress =~ {ref_mailadress} or u.forename =~
+	 * {ref_forename} or u.surname =~ {ref_surname} return u
+	 * 
+	 * ref_x = (?i)"searchterm".*
+	 * 
+	 * @return
+	 */
+	private String getFindUsersCypherQuery() {
 		StringBuilder sb = new StringBuilder();
-		
-		sb.append("match (u:"+ UserDTO.LABEL+ ")");
+
+		sb.append("match (u:" + UserDTO.LABEL + ")");
 		sb.append("where u.mailadress =~ {ref_mailadress} or u.forename =~ {ref_forename} or u.surname =~ {ref_surname} ");
 		sb.append("return u");
-		
-		return sb.toString();	
+
+		return sb.toString();
 	}
-	
-	private String getMakeFriendsCypherQuery(){
+
+	/**
+	 * match (u:USER),(f:USER) where u.mailadress = {r_mail_1} and f.mailadress
+	 * = {r_mail_2} create (u)-[r:FRIENDS {since: {r_since}}]->(f)
+	 * 
+	 * @return
+	 */
+	private String getMakeFriendsCypherQuery() {
 		StringBuilder sb = new StringBuilder();
-		
-		sb.append("match (u:" + UserDTO.LABEL + "),(f:"+ UserDTO.LABEL + ") ");
+
+		sb.append("match (u:" + UserDTO.LABEL + "),(f:" + UserDTO.LABEL + ") ");
 		sb.append("where u.mailadress = {r_mail_1} and f.mailadress = {r_mail_2} ");
-		sb.append("create (u)-[r:"+ RELATIONSHIPS.FRIENDS + " {since: {r_since}}]->(f)");
-		
-		return sb.toString();		
+		sb.append("create (u)-[r:" + RELATIONSHIPS.FRIENDS
+				+ " {since: {r_since}}]->(f)");
+
+		return sb.toString();
 	}
-	
-	private String getUnfriendCypherQuery(){
+
+	/**
+	 * match (u:USER)-[r:FRIENDS]->(f:USER) where u.mailadress = {r_mail_1} and
+	 * f.mailadress = {r_mail_2} delete r
+	 * 
+	 * @return
+	 */
+	private String getUnfriendCypherQuery() {
 		StringBuilder sb = new StringBuilder();
-		
-		sb.append("match (u:"+ UserDTO.LABEL+ ")-[r:"+ RELATIONSHIPS.FRIENDS+ "]->(f:"+ UserDTO.LABEL+ ") ");
+
+		sb.append("match (u:" + UserDTO.LABEL + ")-[r:" + RELATIONSHIPS.FRIENDS
+				+ "]->(f:" + UserDTO.LABEL + ") ");
 		sb.append("where u.mailadress = {r_mail_1} and f.mailadress = {r_mail_2} delete r");
-		
-		return sb.toString();	
+
+		return sb.toString();
 	}
-	
-	private String getFindFriendsOfFriendsCypherQuery(){
+
+	/**
+	 * match (u:USER)-[:FRIENDS*2]-(f:USER) where u.mailadress =
+	 * {ref_mailadress} and not (u:USER)-[:FRIENDS*0..1]-(f:USER) return f
+	 * 
+	 * @return
+	 */
+	private String getFindFriendsOfFriendsCypherQuery() {
 		StringBuilder sb = new StringBuilder();
 
-		sb.append("match (u:" + UserDTO.LABEL + ")-[:"+ RELATIONSHIPS.FRIENDS + "*2]-(f:" + UserDTO.LABEL + ") ");
+		sb.append("match (u:" + UserDTO.LABEL + ")-[:" + RELATIONSHIPS.FRIENDS
+				+ "*2]-(f:" + UserDTO.LABEL + ") ");
 		sb.append("where u.mailadress = {ref_mailadress} and ");
-		sb.append("not (u:USER)-[:FRIENDS*0..1]-(f:USER) ");
+		sb.append("not (u:" + UserDTO.LABEL + ")-[:" + RELATIONSHIPS.FRIENDS
+				+ "*0..1]-(f:" + UserDTO.LABEL + ") ");
 		sb.append("return f");
-		
+
 		return sb.toString();
 	}
-	
-	private String getLoginUserCypherQuery(){
+
+	/**
+	 * match (u:USER) where u.mailadress = {ref_mailadress} and
+	 * u.password={ref_password} return u
+	 * 
+	 * @return
+	 */
+	private String getLoginUserCypherQuery() {
 		StringBuilder sb = new StringBuilder();
 
-		sb.append("match (u:"+ UserDTO.LABEL+ ") ");
+		sb.append("match (u:" + UserDTO.LABEL + ") ");
 		sb.append("where u.mailadress = {ref_mailadress} and u.password={ref_password} return u");
-		
+
 		return sb.toString();
 	}
-	
-	
-	
-	
-	
+
 }
