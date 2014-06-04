@@ -1,6 +1,8 @@
 package de.graphdb.dto;
 
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
@@ -124,32 +126,52 @@ public class UserDTO {
   }
 
   public String getInsertCypherQuery() {
-    if (this.mailadress == null)
-      return null;
-
     StringBuilder sb = new StringBuilder();
 
-    sb.append("{ \"query\" : \"create (u:" + LABEL + "{");
-    if (this.forename != null)
-      sb.append("forname: '" + this.forename + "',");
-    if (this.surname != null)
-      sb.append("surname: '" + this.surname + "',");
-    if (this.mailadress != null)
-      sb.append("mailadress: '" + this.mailadress + "',");
-    if (this.street != null)
-      sb.append("street: '" + this.street + "',");
-    if (this.housenumber != null)
-      sb.append("housenumber: '" + this.housenumber + "',");
-    if (this.postcode != null)
-      sb.append("postcode: '" + this.postcode + "',");
-    if (this.city != null)
-      sb.append("city: '" + this.city + "',");
+    sb.append("CREATE (u:" + LABEL + "{");
+    sb.append("mailadress:{ref_mailadress},"); // mailadress != null !!!!
     if (this.password != null)
-      sb.append("password: '" + this.password + "',");
+        sb.append("password:{ref_password},");
+    if (this.forename != null)
+      sb.append("forename:{ref_forename},");
+    if (this.surname != null)
+      sb.append("surname:{ref_surename},");
+    if (this.street != null)
+      sb.append("street:{ref_street},");
+    if (this.housenumber != null)
+      sb.append("housenumber:{ref_housenumber},");
+    if (this.postcode != null)
+      sb.append("postcode:{ref_postcode},");
+    if (this.city != null)
+      sb.append("city:{ref_city},");
     sb.deleteCharAt(sb.length() - 1);
-    sb.append(" }) return u\" }");
+    sb.append("}) return u");
 
+    System.err.println(sb.toString());
+    
     return sb.toString();
+  }
+  
+  public Map<String, Object> getInsertCypherQueryMap(){
+	  Map<String, Object> result = new HashMap<String, Object>();
+	  
+	  result.put("ref_mailadress", this.mailadress); // mailadress != null !!!!
+	  if(this.password != null)
+		  result.put("ref_password", this.password);
+	  if(this.forename != null)
+		  result.put("ref_forename", this.forename);
+	  if(this.surname != null)
+		  result.put("ref_surename", this.surname);
+	  if(this.street != null)
+		  result.put("ref_street", this.street);
+	  if(this.housenumber != null)
+		  result.put("ref_housenumber", this.housenumber);
+	  if(this.postcode != null)
+		  result.put("ref_postcode", this.postcode);
+	  if(this.city != null)
+		  result.put("ref_city", this.city);
+
+	  return result;
   }
 
   public String getUpdateCypherQuery() {

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.context.request.WebRequest;
 
+import de.graphdb.db.neo4j.Neo4jDaoWithWrappedRest;
 import de.graphdb.db.orientdb.OrientDbDao;
 import de.graphdb.dto.LoginDTO;
 import de.graphdb.dto.UserDTO;
@@ -42,10 +43,9 @@ public class HomeController {
   private ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
       "spring.xml");
 
-  // private TinkerpopDao db = new TinkerpopDao();
-  private OrientDbDao db = new OrientDbDao();
-
-  // private Neo4jDaoWithWrappedRest db = new Neo4jDaoWithWrappedRest();
+  //private TinkerpopDao db = new TinkerpopDao();
+  //private OrientDbDao db = new OrientDbDao();
+  private Neo4jDaoWithWrappedRest db = new Neo4jDaoWithWrappedRest();
 
   @ModelAttribute("LoginDTO")
   public LoginDTO createLoginDTO() {

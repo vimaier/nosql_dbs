@@ -455,4 +455,10 @@ public class TinkerpopDao implements GraphDBInterface {
 		
 		return null;
 	}
+
+	@Override
+	public UserDTO getUserById(String id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
