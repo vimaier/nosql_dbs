@@ -1,7 +1,6 @@
 package de.graphdb.controller;
 
 import java.util.Collection;
-import java.util.LinkedList;
 
 import javax.servlet.http.HttpSession;
 
@@ -21,9 +20,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.context.request.WebRequest;
 
+import de.graphdb.db.neo4j.Neo4jDaoWithWrappedRest;
 import de.graphdb.db.orientdb.OrientDbDao;
 import de.graphdb.dto.LoginDTO;
 import de.graphdb.dto.UserDTO;
+import de.graphdb.form.SearchForm;
 import de.graphdb.form.UserIndexForm;
 
 /**
@@ -42,10 +43,9 @@ public class HomeController {
   private ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
       "spring.xml");
 
-  // private TinkerpopDao db = new TinkerpopDao();
-  private OrientDbDao db = new OrientDbDao();
-
-  // private Neo4jDao db = new Neo4jDao();
+  //private TinkerpopDao db = new TinkerpopDao();
+  //private OrientDbDao db = new OrientDbDao();
+  private Neo4jDaoWithWrappedRest db = new Neo4jDaoWithWrappedRest();
 
   @ModelAttribute("LoginDTO")
   public LoginDTO createLoginDTO() {
@@ -62,6 +62,11 @@ public class HomeController {
     return (UserIndexForm) context.getBean("UserIndexForm");
   }
 
+  @ModelAttribute("SearchForm")
+  public SearchForm createSearchForm() {
+    return (SearchForm) context.getBean("SearchForm");
+  }
+
   @RequestMapping(value = "Home.do")
   public String home(ModelMap model) {
     UserDTO currUser = (UserDTO) session.getAttribute("activeUser");
@@ -75,6 +80,7 @@ public class HomeController {
   public String homeLoggedIn(ModelMap model) {
     model.put("UserDTO", createUserDTO());
     model.put("LoginDTO", createLoginDTO());
+    model.put("SearchForm", createSearchForm());
     return "index";
   }
 
@@ -134,9 +140,10 @@ public class HomeController {
       @RequestParam(value = "id", required = false) String id) {
     logger.info("***** UserIndex");
     UserIndexForm uform = createUserindexForm();
+    UserDTO currUser = (UserDTO) session.getAttribute("activeUser");
     UserDTO user;
     if (id == null || id.isEmpty()) {
-      user = (UserDTO) session.getAttribute("activeUser");
+      user = currUser;
       if (user != null && user.getId() != null && !user.getId().isEmpty()) {
         id = user.getId();
         uform.setUser(user);
@@ -147,24 +154,71 @@ public class HomeController {
       user = db.getUserById(id);
       uform.setUser(user);
     }
-    // uform.setFriends(db.findFriends(user));
-    /**
-     * TestDATEN
-     */
-    Collection<UserDTO> testlauf = new LinkedList<UserDTO>();
-    for (int i = 0; i <= 10; i++) {
-      UserDTO usertest = createUserDTO();
-      usertest.setId("9:2");
-      usertest.setForename("Deine");
-      usertest.setSurname("Mudda");
-      testlauf.add(usertest);
+    Collection<UserDTO> friends = db.findFriends(user);
+    if (friends != null && currUser != null
+        && friends.contains(db.getUserById(currUser.getId()))) {
+      model.put("isFriend", true);
     }
-    /**
-     * 
-     */
-    uform.setFriends(testlauf);
+    uform.setFriendsoffriends(db.findFriendsOfFriends(user));
+    uform.setFriends(friends);
     model.put("UserIndexForm", uform);
     return "userindex";
+  }
+
+  /**
+   * 
+   * @param model
+   * @param uform
+   * @return
+   */
+  @RequestMapping(value = "MakeFriends.do")
+  public String MakeFriends(ModelMap model,
+      @ModelAttribute("UserIndexForm") UserIndexForm uform) {
+
+    UserDTO currUser = (UserDTO) session.getAttribute("activeUser");
+    UserDTO newFriend = uform.getUser();
+    if (currUser != null && !currUser.getId().isEmpty() && newFriend != null
+        && !newFriend.getId().isEmpty()) {
+      db.makeFriends(currUser, newFriend);
+    }
+    return "redirect:UserIndex.do?id=" + uform.getUser().getId();
+  }
+
+  /**
+   * 
+   * @param model
+   * @param uform
+   * @return
+   */
+  @RequestMapping(value = "Unfriend.do")
+  public String unfriend(ModelMap model,
+      @ModelAttribute("UserIndexForm") UserIndexForm uform) {
+    UserDTO currUser = (UserDTO) session.getAttribute("activeUser");
+    UserDTO newFriend = uform.getUser();
+    if (currUser != null && !currUser.getId().isEmpty() && newFriend != null
+        && !newFriend.getId().isEmpty()) {
+      db.unfriend(currUser, newFriend);
+    }
+    return "redirect:UserIndex.do?id=" + uform.getUser().getId();
+  }
+
+  @RequestMapping(value = "Delete.do")
+  public String delete(ModelMap model,
+      @ModelAttribute("UserIndexForm") UserIndexForm uform) {
+    UserDTO currUser = uform.getUser();
+    if (currUser != null && !currUser.getId().isEmpty()) {
+      db.deleteUser(currUser);
+      session.removeAttribute("activeUser");
+      model.put("UserDTO", createUserDTO());
+    }
+    return "redirect:/";
+  }
+
+  @RequestMapping(value = "Search.do")
+  public String search(ModelMap model,
+      @ModelAttribute("SearchForm") SearchForm sform) {
+    sform.setResult(db.findUsers(sform.getSearch()));
+    return "searchresult";
   }
 
   /**

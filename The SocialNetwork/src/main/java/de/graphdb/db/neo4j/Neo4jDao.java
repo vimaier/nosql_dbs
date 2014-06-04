@@ -15,7 +15,7 @@ import de.graphdb.service.ParseJSON;
 
 public class Neo4jDao implements GraphDBInterface {
 	
-	private static final String SERVER_ROOT_URI = "http://10.0.3.43:7474/db/data/";
+	private static final String SERVER_ROOT_URI = "http://10.0.107.174:7474/db/data/";
 
 	@Override
 	public boolean insertUser(UserDTO user) {
@@ -182,5 +182,11 @@ public class Neo4jDao implements GraphDBInterface {
     // TODO Auto-generated method stub
     return null;
   }
+
+@Override
+public UserDTO getUserById(String id) {
+	// TODO Auto-generated method stub
+	return null;
+}
 
 }
