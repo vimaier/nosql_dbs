@@ -45,7 +45,7 @@ public class HomeController {
   // private TinkerpopDao db = new TinkerpopDao();
   private OrientDbDao db = new OrientDbDao();
 
-  // private Neo4jDao db = new Neo4jDao();
+  // private Neo4jDaoWithWrappedRest db = new Neo4jDaoWithWrappedRest();
 
   @ModelAttribute("LoginDTO")
   public LoginDTO createLoginDTO() {

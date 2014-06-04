@@ -28,7 +28,7 @@ import de.graphdb.dto.UserDTO.RELATIONSHIPS;
  */
 public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 
-	private static final String SERVER_ROOT_URI = "http://localhost:7474/db/data/";
+	private static final String SERVER_ROOT_URI = "http://10.0.107.147:7474/db/data/";
 	
 	
 	private Logger log = LoggerFactory.getLogger(Neo4jDaoWithWrappedRest.class);
