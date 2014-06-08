@@ -13,7 +13,7 @@ import random
 
 _EMAIL_SCHEME = "{0}.{1}@graphdb.fh"
 
-CYPHER_FILE_PATH = "cypher_queries.txt"
+_CYPHER_FILE_PATH = "cypher_queries.txt"
 # '{{' and '}}' are escape characters for '{' and '}'
 _CYPHER_CREATE_NODE_STMNT = "CREATE ( :USER{{ mailadress:\"{0}\", password:\"{1}\", forename:\"{2}\", surname:\"{3}\", city:\"{4}\" }} )"
 _CYPHER_CREATE_EDGE_STMT = "MATCH (first:USER{{mailadress:\"{0}\"}}), (second:USER{{mailadress:\"{1}\"}}) CREATE (first)-[:FRIENDS]->(second)"
@@ -23,8 +23,8 @@ _ORIENTDB_CREATE_NODE_STMNT = "TODO: {0}{1}{2}{3}{4}"
 _ORIENTDB_CREATE_EDGE_STMT = "TODO: {0}{1}"
 
 _GREMLIN_FILE_PATH = "tinkerpop_queries.txt"
-_GREMLIN_CREATE_NODE_STMNT = "TODO: {0}{1}{2}{3}{4}"
-_GREMLIN_CREATE_EDGE_STMT = "TODO: {0}{1}"
+_GREMLIN_CREATE_NODE_STMNT = "g.addVertex([mailadress: '{0}', password: '{1}', forename: '{2}', surname: '{3}', city: '{4}'])"
+_GREMLIN_CREATE_EDGE_STMT = "first=g.V.has('mailadress', '{0}');second=g.V.has('mailadress' ,'{1}');g.addEdge(first, second, 'friends')"
 
 
 def main():
@@ -39,15 +39,15 @@ def create_graphdb_statements():
     
 def create_cypher_queries(graph_data):
     query_list = _create_queries(graph_data, _CYPHER_CREATE_NODE_STMNT, _CYPHER_CREATE_EDGE_STMT)
-    _save_queries_into_file(query_list, CYPHER_FILE_PATH)
+    _save_queries_into_file(query_list, _CYPHER_FILE_PATH)
 	    
 def create_orientdb_queries(graph_data):
     query_list = _create_queries(graph_data, _ORIENTDB_CREATE_NODE_STMNT, _ORIENTDB_CREATE_EDGE_STMT)
-    _save_queries_into_file(query_list, ORIENTDB_FILE_PATH)
+    _save_queries_into_file(query_list, _ORIENTDB_FILE_PATH)
 	    
 def create_gremlin_queries(graph_data):
     query_list = _create_queries(graph_data, _GREMLIN_CREATE_NODE_STMNT, _GREMLIN_CREATE_EDGE_STMT)
-    _save_queries_into_file(query_list, GREMLIN_FILE_PATH)
+    _save_queries_into_file(query_list, _GREMLIN_FILE_PATH)
     
         
 def _create_queries(graph_data, create_node_stmt, create_edge_stmt):
