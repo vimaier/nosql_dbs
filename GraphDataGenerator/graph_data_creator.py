@@ -34,10 +34,20 @@ def create_graphdb_statements():
     graph_data_loader = GraphDataLoader()
     graph_data = graph_data_loader.get_graph_data()
     create_cypher_queries(graph_data)
+    create_orientdb_queries(graph_data)
+    create_gremlin_queries(graph_data)
     
 def create_cypher_queries(graph_data):
     query_list = _create_queries(graph_data, _CYPHER_CREATE_NODE_STMNT, _CYPHER_CREATE_EDGE_STMT)
     _save_queries_into_file(query_list, CYPHER_FILE_PATH)
+	    
+def create_orientdb_queries(graph_data):
+    query_list = _create_queries(graph_data, _ORIENTDB_CREATE_NODE_STMNT, _ORIENTDB_CREATE_EDGE_STMT)
+    _save_queries_into_file(query_list, ORIENTDB_FILE_PATH)
+	    
+def create_gremlin_queries(graph_data):
+    query_list = _create_queries(graph_data, _GREMLIN_CREATE_NODE_STMNT, _GREMLIN_CREATE_EDGE_STMT)
+    _save_queries_into_file(query_list, GREMLIN_FILE_PATH)
     
         
 def _create_queries(graph_data, create_node_stmt, create_edge_stmt):
