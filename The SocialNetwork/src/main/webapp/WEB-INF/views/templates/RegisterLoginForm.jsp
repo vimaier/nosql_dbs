@@ -30,7 +30,7 @@
           </sf:label>
         </div>
         <div class="fr">
-          <sf:input type="email" class="input_text" path="mailadress" />
+          <sf:input required="required" type="email" class="input_text" path="mailadress" />
         </div>
         <div class="clr"></div>
         <div class="fl">
@@ -39,7 +39,7 @@
           </sf:label>
         </div>
         <div class="fr">
-          <sf:password class="input_text" path="password" />
+          <sf:password required="required" class="input_text" path="password" />
         </div>
         <div class="clr"></div>
         <div class="fl">
@@ -119,7 +119,7 @@
           </sf:label>
         </div>
         <div class="fr">
-          <sf:input type="email" class="input_text" path="mailadress" />
+          <sf:input type="email" required="required" class="input_text" path="mailadress" />
         </div>
         <div class="clr"></div>
         <div class="fl">
@@ -128,7 +128,7 @@
           </sf:label>
         </div>
         <div class="fr">
-          <sf:password class="input_text" path="password" />
+          <sf:password required="required" class="input_text" path="password" />
         </div>
         <div class="clr"></div>
         <div class="fl">
@@ -195,7 +195,7 @@
       </sf:label>
     </div>
     <div class="fr">
-      <sf:input type="email" class="input_text" path="mailadress" />
+      <sf:input type="email" required="required" class="input_text" path="mailadress" />
     </div>
     <div class="clr"></div>
     <div class="fl">
@@ -204,7 +204,7 @@
       </sf:label>
     </div>
     <div class="fr">
-      <sf:password class="input_text" path="password" />
+      <sf:password required="required" class="input_text" path="password" />
     </div>
     <div class="clr"></div>
     <div class="fl">
