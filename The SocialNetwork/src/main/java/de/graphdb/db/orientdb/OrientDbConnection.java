@@ -3,6 +3,9 @@ package de.graphdb.db.orientdb;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.orientechnologies.orient.core.metadata.schema.OClass;
+import com.orientechnologies.orient.core.metadata.schema.OSchema;
+import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
 
 public class OrientDbConnection
@@ -82,6 +85,16 @@ public class OrientDbConnection
 		log.debug("try to open database");
 		
 		this.graphFactory = new OrientGraphFactory(this.databaseUrl,this.username,this.password).setupPool(10,10);		
+		
+		OSchema schema = this.graphFactory.getDatabase().getMetadata().getSchema();
+		
+		OClass oClass = schema.getClass("V");
+		
+		if(!oClass.areIndexed("mailadress"))
+		{
+			 oClass.createProperty("mailadress", OType.STRING).setNotNull(true);
+			 oClass.createIndex("mailadressIndex",OClass.INDEX_TYPE.UNIQUE,"mailadress");	
+		}
 		
 		log.debug("Succesfully opened database");
 	}
