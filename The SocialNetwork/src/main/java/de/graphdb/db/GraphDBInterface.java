@@ -79,15 +79,6 @@ public interface GraphDBInterface {
    * @return Collection<UserDTO>
    */
   public Collection<UserDTO> findFriendsOfFriends(UserDTO user);
-
-  /**
-   * Gibt Verwandte zurueck - Eventuell auf 10 oder 20 limitieren.
-   * 
-   * @param user
-   *          UserDTO
-   * @return Collection<UserDTO>
-   */
-  public Collection<UserDTO> findRelative(UserDTO user);
   
   /**
    * Rueckgabe des kompletten UserDTO welches ueber die uebergebene Email(unique) gefunden wird.

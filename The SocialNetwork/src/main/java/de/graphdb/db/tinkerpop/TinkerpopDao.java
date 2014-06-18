@@ -17,7 +17,8 @@ import de.graphdb.db.GraphDBInterface;
 import de.graphdb.dto.LoginDTO;
 import de.graphdb.dto.UserDTO;
 
-public class TinkerpopDao implements GraphDBInterface {
+public class TinkerpopDao implements GraphDBInterface 
+{
 
 	// Rexster-object for client connection
 	private RexsterClient client;
@@ -29,28 +30,46 @@ public class TinkerpopDao implements GraphDBInterface {
 //	private final String serverDB = "tinkergraph"; // name of the database
 	private final String serverDB = "neo4jsample"; // name of the database
 
-	// Connect to Rexster-client
+
+	/**
+	 * Connect to Rexster-client
+	 */
 	public void connect() {
-		try {
-			if (clientStatus == false) {
+		try 
+		{
+			if (clientStatus == false) 
+			{
 				clientStatus = true;
 				client = RexsterClientFactory.open(serverIP, serverDB);
 			}
-		} catch (Exception e) {
+		} 
+		catch (Exception e) 
+		{
 			e.printStackTrace();
 		}
 	}
 
-	// Disconnect connection to Rexster
-	public void disconnect() {
-		try {
+	/**
+	 * Disconnect from Rexster
+	 */
+	public void disconnect() 
+	{
+		try 
+		{
 			client.close();
 			clientStatus = false;
-		} catch (IOException e) {
+		} 
+		catch (IOException e) 
+		{
 			e.printStackTrace();
 		}
 	}
 
+	/**
+	 * Converts a map-Object to an User-Object
+	 * @param currMap
+	 * @return
+	 */
 	public UserDTO mapToUserDTO(Map<String, Object> currMap) {
 		UserDTO newUser = new UserDTO();
 
@@ -76,44 +95,58 @@ public class TinkerpopDao implements GraphDBInterface {
 			newUser.setMailadress(currMap.get("mailadress").toString());
 			newUser.setId(getVIdByEmail(newUser).toString());
 		}
-		
-		
+				
 		return newUser;
 	}
 
-	private Object getVIdByEmail(UserDTO user) {
+	/**
+	 * Get the Vertex ID by the Email-Property
+	 * @param user
+	 * @return Id of the Vertex of the user passed in
+	 */
+	private Object getVIdByEmail(UserDTO user) 
+	{
 		Object id = null;
 
 		try {
 			connect();
 
-			if (user.getMailadress() != null) {
-				List<Map<String, Object>> results = client.execute("g.V.has('mailadress', '" + user.getMailadress() + "').id");
+			if (user.getMailadress() != null) 
+			{
+				List<Map<String, Object>> results = 
+						client.execute("g.V.has('mailadress', '" 
+								+ user.getMailadress() + "').id");
 				id = results.get(0);
-			} else {
-				System.out.println("****************************************************************************************************");
-				
-			}
-		} catch (RexProException e) {
+			} 
+		} 
+		catch (RexProException e) 
+		{
 			e.printStackTrace();
-		} catch (IOException e) {
+		} 
+		catch (IOException e) 
+		{
 			e.printStackTrace();
+		} 
+		finally 
+		{
+			//disconnect from rexster
+			disconnect();
 		}
 
 		return id;
 	}
 
 	@Override
-	public UserDTO getUserById(String id) {
+	public UserDTO getUserById(String id) 
+	{
 		UserDTO user = new UserDTO();
 		
-		try {
+		try 
+		{
 			connect();
 			
-			// Gremlin-Query in der Konsole ausgeben
-			System.out.println("***** getUserById - Gremlin: g.v(" + id + ").map");
-
-			List<Map<String, Object>> results = client.execute("g.v(" + id + ").map");
+			List<Map<String, Object>> results = 
+					client.execute("g.v(" + id + ").map");
 			
 			Iterator<Map<String, Object>> itUserData = results.iterator();
 
@@ -124,27 +157,44 @@ public class TinkerpopDao implements GraphDBInterface {
 
 				// Setze Eigenschaften in das UserDTO-Objekt
 				newUser.setForename(userDataMap.get("forname").toString());
-				newUser.setSurname(userDataMap.get("surname").toString());
-				newUser.setMailadress(userDataMap.get("mailadress").toString());
-				newUser.setStreet(userDataMap.get("street").toString());
-				newUser.setHousenumber(userDataMap.get("housenumber").toString());
-				newUser.setPostcode(userDataMap.get("postcode").toString());
-				newUser.setCity(userDataMap.get("city").toString());
-				newUser.setPassword(userDataMap.get("password").toString());
-				newUser.setPicture_up((CommonsMultipartFile) userDataMap.get("picture_up"));
 				
-				// Wichtig, dass die ID erst hier gesetzt wird, weil vorher in User keine eMail gesetzt ist 
+				newUser.setSurname(userDataMap.get("surname").toString());
+				
+				newUser.setMailadress(
+						userDataMap.get("mailadress").toString());
+				
+				newUser.setStreet(userDataMap.get("street").toString());
+				
+				newUser.setHousenumber(
+						userDataMap.get("housenumber").toString());
+				
+				newUser.setPostcode(userDataMap.get("postcode").toString());
+				
+				newUser.setCity(userDataMap.get("city").toString());
+				
+				newUser.setPassword(userDataMap.get("password").toString());
+				
+				newUser.setPicture_up(
+						(CommonsMultipartFile) userDataMap.get("picture_up"));
+				
+				// Wichtig, dass die ID erst hier gesetzt wird, 
+				// weil vorher in User keine eMail gesetzt ist 
 				newUser.setId(getVIdByEmail(newUser).toString());
 				
 				return newUser;										
 			}
-		} catch (RexProException e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (RexProException e) 
+		{
 			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (IOException e) 
+		{
 			e.printStackTrace();
-		} finally {
+		} 
+		finally 
+		{
+			//disconnect from rexster
 			disconnect();
 		}
 		
@@ -152,17 +202,21 @@ public class TinkerpopDao implements GraphDBInterface {
 	}
 
 	@Override
-	public boolean insertUser(UserDTO user) {
+	public boolean insertUser(UserDTO user) 
+	{
 		boolean ret = false;
 		
-		try {
+		try 
+		{
 			connect();
 
-			if (user.getMailadress() != null) {
+			if (user.getMailadress() != null) 
+			{
 				StringBuilder sb = new StringBuilder();
 
 				// beginn
 				sb.append("g.addVertex([");
+				
 				if (user.getForename() != null)
 					sb.append("forname: '" + user.getForename() + "',");
 				if (user.getSurname() != null)
@@ -179,16 +233,19 @@ public class TinkerpopDao implements GraphDBInterface {
 					sb.append("city: '" + user.getCity() + "',");
 				if (user.getPassword() != null)
 					sb.append("password: '" + user.getPassword() + "',");
+				
 				// entferne letztes komma
 				sb.deleteCharAt(sb.length() - 1);
+				
 				// ende
 				sb.append("])");
 
 				List<Map<String, Object>> results = client.execute(sb
 						.toString());
 
-				if (results.size() > 0) {
-					Map resMap = results.get(0);
+				if (results.size() > 0) 
+				{
+					Map<String, Object> resMap = results.get(0);
 					boolean hasId = resMap.containsKey("_id");
 
 					if (true == hasId) {
@@ -196,11 +253,18 @@ public class TinkerpopDao implements GraphDBInterface {
 					}
 				}
 			}
-
-			disconnect();
-
-		} catch (Exception e) {
-			System.out.println(e.toString());
+		} 
+		catch (RexProException e) 
+		{
+			e.printStackTrace();
+		} 
+		catch (IOException e) 
+		{
+			e.printStackTrace();
+		} 
+		finally 
+		{
+			//disconnect from rexster
 			disconnect();
 		}
 
@@ -208,14 +272,19 @@ public class TinkerpopDao implements GraphDBInterface {
 	}
 
 	@Override
-	public UserDTO updateUser(UserDTO user) {
+	public UserDTO updateUser(UserDTO user) 
+	{	
 		UserDTO userRet = user;
 		Object id = getVIdByEmail(user);
 
 		// Setze Id im UserId
 		userRet.setId(id.toString());
-		try {
-			if (id != null) {
+		
+		try 
+		{
+			if (id != null) 
+			{
+				
 				if (user.getForename() != null)
 					client.execute("g.v(" + id + ").forname='"
 							+ user.getForename() + "'");
@@ -232,20 +301,25 @@ public class TinkerpopDao implements GraphDBInterface {
 					client.execute("g.v(" + id + ").postcode='"
 							+ user.getPostcode() + "'");
 				if (user.getCity() != null)
-					client.execute("g.v(" + id + ").city='" + user.getCity()
+					client.execute("g.v(" + id + ").city='" 
+							+ user.getCity()
 							+ "'");
 				if (user.getPassword() != null)
 					client.execute("g.v(" + id + ").password='"
 							+ user.getPassword() + "'");
-			} else {
-				userRet = null;
-			}
-		} catch (RexProException e) {
+			} 
+		} 
+		catch (RexProException e) 
+		{
 			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (IOException e) 
+		{
 			e.printStackTrace();
-		} finally {
+		} 
+		finally 
+		{
+			//disconnect from rexster
 			disconnect();
 		}
 
@@ -253,51 +327,55 @@ public class TinkerpopDao implements GraphDBInterface {
 	}
 
 	@Override
-	public boolean deleteUser(UserDTO user) {
+	public boolean deleteUser(UserDTO user) 
+	{
 		boolean ret = false;
 
 		Object id = getVIdByEmail(user);
 
-		try {
-			List<Map<String, Object>> results = client.execute("g.v(" + id
-					+ ").remove()");
+		try 
+		{
+			List<Map<String, Object>> results = 
+					client.execute("g.v(" + id + ").remove()");
 
-			// Gremlin-Query in der Konsole ausgeben
-			System.out.println("g.v(" + id + ").remove()");
-			
-			if (results.size() == 1) {
+			if (results.size() == 1) 
+			{
 				ret = true;
-			}
-		} catch (RexProException e) {
-			// TODO Auto-generated catch block
+			}			
+		} 
+		catch (RexProException e) 
+		{
 			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (IOException e) 
+		{
 			e.printStackTrace();
+		} 
+		finally 
+		{
+			//disconnect from rexster
+			disconnect();
 		}
 
 		return ret;
 	}
 
 	@Override
-	public Collection<UserDTO> findFriends(UserDTO user) {
+	public Collection<UserDTO> findFriends(UserDTO user) 
+	{	
 		// Id des Users finden und in ein neues UserObjekt speichern
 		UserDTO id = getUserById(user.getId());
 
 		Collection<UserDTO> coll = new LinkedList<UserDTO>();
 		
-		try {
+		try 
+		{
 			connect();
-			
-			// Gremlin-Query in der Konsole ausgeben
-			System.out.println("####################################################################################");
-			System.out.println("***** findFriends - Gremlin: g.v(" + user.getId() + ").outE('friends').inV.map");
-			
-			List<Map<String, Object>> results = client.execute("g.v(" + id.getId() + ").outE('friends').inV.map");
-			
-//			List<Map<String, Object>> results = client.execute("g.v(" + user.getId() + ").outE('friends').inV.map");
 
-			
+			List<Map<String, Object>> results = 
+					client.execute("g.v(" + id.getId() + ")"
+							+ ".outE('friends').inV.map");
+						
 			Iterator<Map<String, Object>> it = results.iterator();
 
 			while (it.hasNext()) {
@@ -305,50 +383,56 @@ public class TinkerpopDao implements GraphDBInterface {
 				UserDTO newUser = mapToUserDTO(currMap);
 				coll.add(newUser);
 			}
-
-		} catch (RexProException e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (RexProException e) 
+		{
 			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (IOException e) 
+		{
 			e.printStackTrace();
+		} 
+		finally 
+		{
+			//disconnect from rexster
+			disconnect();
 		}
 
 		return coll;
 	}
 
 	@Override
-	public Collection<UserDTO> findUsers(String suchbegriff) {
+	public Collection<UserDTO> findUsers(String suchbegriff) 
+	{
 		Collection<UserDTO> coll = new LinkedList<UserDTO>();
 
-		try {
+		try 
+		{
 			connect();
 			
 			// Finde zuerst alle Vertices und speichere sie in results
 			List<Map<String, Object>> results = client.execute("g.V.id");
 			Iterator<Map<String, Object>> it = results.iterator();
-			
-			// Gremlin-Query in der Konsole ausgeben
-			System.out.println("***** Gremlin: g.V.id");
-			
+						
 			// Lege Liste an für die while-Schleife
 			List<Map<String, Object>> values;
 
 			// Prüfe jeden Vertex, ob der Suchbegriff enthalten ist 
-			while (it.hasNext()) {
+			while (it.hasNext()) 
+			{			
 				Object id = it.next();
 				
-				// Frage alle Werte eines Vertex ab und speichere sie in values
+				// Frage alle Werte eines Vertex ab 
+				// und speichere sie in values
 				values = client.execute("g.v(" + id + ").values()");
 
-				// Gremlin-Query in der Konsole ausgeben
-				System.out.println("***** Gremlin: g.v(" + id + ").values()");
-				
 				// Values auf Suchbegriff durchsuchen
 				if (values.contains(suchbegriff)) {
-					List<Map<String, Object>> userData = client.execute("g.v(" + id + ").map");
+					List<Map<String, Object>> userData = 
+							client.execute("g.v(" + id + ").map");
 
-					Iterator<Map<String, Object>> itUserData = userData.iterator();
+					Iterator<Map<String, Object>> itUserData = 
+							userData.iterator();
 
 					while (itUserData.hasNext()) {
 						Map<String, Object> userDataMap = itUserData.next();
@@ -357,124 +441,163 @@ public class TinkerpopDao implements GraphDBInterface {
 					}
 				}
 			}
-		} catch (RexProException e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (RexProException e) 
+		{
 			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (IOException e) 
+		{
 			e.printStackTrace();
+		} 
+		finally 
+		{
+			//disconnect from rexster
+			disconnect();
 		}
-
-		disconnect();
+		
 		return coll;
 	}
 
 	@Override
-	public boolean makeFriends(UserDTO user, UserDTO friend) {
+	public boolean makeFriends(UserDTO user, UserDTO friend) 
+	{
+		//set return value initialy to false
 		boolean ret = false;
 
 		Object userId = getVIdByEmail(user);
 		Object friendId = getVIdByEmail(friend);
 
-		try {
-			if (userId != null && friendId != null) {
-				List<Map<String, Object>> results = client.execute("v1=g.v(" + userId + ");" + "v2=g.v(" + friendId + ");"
-																+ "g.addEdge(v1,v2,'friends');"
-																+ "g.addEdge(v2,v1,'friends')");
+		try 
+		{
+			if (userId != null && friendId != null) 
+			{				
+				List<Map<String, Object>> results = 
+						client.execute("v1=g.v(" + userId + ");" 
+								+ "v2=g.v(" + friendId + ");"
+								+ "g.addEdge(v1,v2,'friends');"
+								+ "g.addEdge(v2,v1,'friends')");
 
-				// Gremlin-Query in der Konsole ausgeben
-				System.out.println("***** makeFriends - Gremlin: v1=g.v(" + userId + ");" + "v2=g.v(" + friendId + ");" + "g.addEdge(v1,v2,'friends')");
-				
-				if (results.size() == 1) {
+				if (results.size() == 1) 
+				{
 					ret = true;
 				}
 			}
-		} catch (RexProException e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (RexProException e) 
+		{
 			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (IOException e) 
+		{
 			e.printStackTrace();
+		} 
+		finally 
+		{
+			//disconnect from rexster
+			disconnect();
 		}
-
-		disconnect();
+		
 		return ret;
 	}
 
 	@Override
-	public boolean unfriend(UserDTO user, UserDTO friend) {
+	public boolean unfriend(UserDTO user, UserDTO friend) 
+	{
 		boolean ret = false;
 		Object userId = getVIdByEmail(user);
 		Object friendId = getVIdByEmail(friend);
 
-		try {
+		try 
+		{
 			connect();
-			if (userId != null && friendId != null) {
-//				List<Map<String, Object>> results = client.execute("g.v(" + userId + ")." + "outE('friends').as('x')." + "inV.has('mailadress', '" + friend.getMailadress()	+ "')." + "back('x').remove()"
-//																	);
+			if (userId != null && friendId != null) 
+			{
 				
-				List<Map<String, Object>> results = client.execute("g.v(" + userId + ").bothE('friends').as('x').bothV.has('mailadress', '" + friend.getMailadress() + "').back('x').remove()");
+				List<Map<String, Object>> results = 
+						client.execute("g.v(" + userId + ")"
+								+ ".bothE('friends').as('x')"
+								+ ".bothV.has('mailadress', '" 
+									+ friend.getMailadress() + "')"
+								+ ".back('x').remove()");
 				
-				if (results.size() == 1) {
-					ret = true;
+				if (results.size() == 1) 
+				{
+					ret = true;	
 				}
 			}
-		} catch (RexProException e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (RexProException e) 
+		{
 			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (IOException e) 
+		{
 			e.printStackTrace();
+		} 
+		finally 
+		{
+			//disconnect from rexster
+			disconnect();
 		}
-
-		disconnect();
+		
 		return ret;
 	}
 
 	@Override
-	public Collection<UserDTO> findFriendsOfFriends(UserDTO user) {
-		// TODO Auto-generated method stub
-		return null;
+	public Collection<UserDTO> findFriendsOfFriends(UserDTO user) 
+	{		
+		Collection<UserDTO> coll = new LinkedList<UserDTO>();
+		
+		Object userId = user.getId();		
+		assert(userId != null);
+					
+		List<Map<String, Object>> results;
+		
+		try 
+		{
+			//connect to rexster
+			connect();
+			
+			//execute gremlin query to get all friends of friend
+			results = client.execute("g.v(" + userId + ")"
+					+ ".outE('friends').inV"
+					+ ".outE('friends').inV.map");
+					
+			Iterator<Map<String, Object>> it = results.iterator();
+	
+			//add each friend from results to the collection of friends
+			while (it.hasNext()) 
+			{
+				Map<String, Object> currMap = it.next();
+				UserDTO newUser = mapToUserDTO(currMap);
+				coll.add(newUser);
+			}		
+		} 
+		catch (RexProException e) 
+		{
+			e.printStackTrace();
+		} 
+		catch (IOException e) 
+		{
+			e.printStackTrace();
+		} 
+		finally 
+		{
+			//disconnect from rexster
+			disconnect();
+		}
+		
+		return coll;
 	}
 
-	/*
-	 * List<Map<String, Object>> results =
-	 * client.execute("g.v(1).outE('knows').inV.outE('created').inV");
-	 */
-	// @Override
-	// public Collection<UserDTO> findFriendsOfFriends(Collection<UserDTO>
-	// friends) {
-	//
-	// Collection<UserDTO> friendsCollection = new LinkedList<UserDTO>();
-	//
-	// Iterator<UserDTO> it = friends.iterator();
-	//
-	// while(it.hasNext())
-	// {
-	// UserDTO user = it.next();
-	//
-	// Collection<UserDTO> findFriendsCollection = findFriends(user);
-	//
-	// Iterator<UserDTO> it2 = findFriendsCollection.iterator();
-	//
-	// while(it2.hasNext())
-	// {
-	// friendsCollection.add(it2.next());
-	// }
-	// }
-	//
-	// return friendsCollection;
-	// }
-
 	@Override
-	public Collection<UserDTO> findRelative(UserDTO user) {
-
-		return null;
-	}
-
-	@Override
-	public UserDTO loginUser(LoginDTO login) {
-		if (login.getMailadress() != null && login.getPassword() != null) {
+	public UserDTO loginUser(LoginDTO login) 
+	{		
+		if (login.getMailadress() != null 
+			&& 
+			login.getPassword() != null) 
+		{
 			try {
 				connect();
 				
@@ -484,39 +607,53 @@ public class TinkerpopDao implements GraphDBInterface {
 								+ "').has('password', '" + login.getPassword()
 								+ "').map");
 
-				// Gremlin-Query in der Konsole ausgeben
-				System.out.println("***** Gremlin: g.V.has('mailadress', '" + login.getMailadress() + "').has('password', '" + login.getPassword() + "').map");
-				
 				Iterator<Map<String, Object>> itUserData = results.iterator();
 
-				while (itUserData.hasNext()) {
+				while (itUserData.hasNext()) 
+				{
 					Map<String, Object> userDataMap = itUserData.next();
 
 					UserDTO newUser = new UserDTO();
 
 					// Setze Eigenschaften in das UserDTO-Objekt
-					newUser.setForename(userDataMap.get("forname").toString());
-					newUser.setSurname(userDataMap.get("surname").toString());
-					newUser.setMailadress(userDataMap.get("mailadress").toString());
-					newUser.setStreet(userDataMap.get("street").toString());
-					newUser.setHousenumber(userDataMap.get("housenumber").toString());
-					newUser.setPostcode(userDataMap.get("postcode").toString());
-					newUser.setCity(userDataMap.get("city").toString());
-					newUser.setPassword(userDataMap.get("password").toString());
-					newUser.setPicture_up((CommonsMultipartFile) userDataMap.get("picture_up"));
+					newUser.setForename(
+							userDataMap.get("forname").toString());
+					newUser.setSurname(
+							userDataMap.get("surname").toString());
+					newUser.setMailadress(
+							userDataMap.get("mailadress").toString());
+					newUser.setStreet(
+							userDataMap.get("street").toString());
+					newUser.setHousenumber(
+							userDataMap.get("housenumber").toString());
+					newUser.setPostcode(
+							userDataMap.get("postcode").toString());
+					newUser.setCity(
+							userDataMap.get("city").toString());
+					newUser.setPassword(
+							userDataMap.get("password").toString());
+					newUser.setPicture_up(
+							(CommonsMultipartFile) userDataMap.get(
+									"picture_up"));
 					
-					// Wichtig, dass die ID erst hier gesetzt wird, weil vorher in User keine eMail gesetzt ist 
+					// Wichtig, dass die ID erst hier gesetzt wird, 
+					// weil vorher in User keine eMail gesetzt ist 
 					newUser.setId(getVIdByEmail(newUser).toString());
 					
 					return newUser;										
 				}
-			} catch (RexProException e) {
-				// TODO Auto-generated catch block
+			} 
+			catch (RexProException e) 
+			{
 				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
+			} 
+			catch (IOException e) 
+			{
 				e.printStackTrace();
-			} finally {
+			} 
+			finally 
+			{
+				//disconnect from rexster
 				disconnect();
 			}
 		}
