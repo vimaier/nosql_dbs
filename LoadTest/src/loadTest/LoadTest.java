@@ -57,11 +57,43 @@ public class LoadTest {
 	}
 	
 	/**
+	 * Führt einen Lesetest mit Operationen aus und gibt die Dauer bis zum
+	 * Ende der Operation zurück.
+	 * @return
+	 */
+	public double performReadTest(int numberOfThreads)
+	{
+		//Merke die Anzhal der Threads um das arithmetische Mittel zu 
+		//berechnen nachdem alle queries ausgeführt wurden.
+		this.numberOfThreads = numberOfThreads;
+		
+		//Stelle Verbindung zur Datenbank her.
+		graphDB.connect();
+			
+		int vertexName = 1;
+		while(vertexName++ <= numberOfThreads)
+		{			
+			//Übergebe Ausführung der Query an Qorker-Thread und erhalte
+			//benötigte Zeit in Millisekunden.
+			long elapsedTime = new WorkerThread(graphDB)
+				.executeReadVertex(vertexName);
+			
+			//Füge Zeitmessung zum Array mit allen Zeiten hinzu
+			this.elapsedTimes.add((int) elapsedTime);			
+		}
+		
+		//berechne Standardabweichung
+		this.calcStandardabweichung();
+				
+		return 0;
+	}
+	
+	/**
 	 * Führt einen Lesetest mit allen Operationen aus this.queryList aus
 	 * und gibt die Dauer bis zum Ende der Operation zurück.
 	 * @return
 	 */
-	public double performReadTest(int numberOfThreads)
+	public double performReadTestFromFile(int numberOfThreads)
 	{
 		//Merke die Anzhal der Threads um das arithmetische Mittel zu 
 		//berechnen nachdem alle queries ausgeführt wurden.
@@ -95,8 +127,8 @@ public class LoadTest {
 	}
 	
 	/**
-	 * Führt einen Schreibtest mit allen Operationen aus this.queryList aus
-	 * und gibt die Dauer bis zum Ende der Operation zurück.
+	 * Führt einen Schreibtest mit Operationen aus und gibt die Dauer bis 
+	 * zum Ende der Operation zurück.
 	 * @return
 	 */
 	public double performWriteTest(int numberOfThreads)
@@ -104,6 +136,17 @@ public class LoadTest {
 		return 0;
 		
 	}
+	
+	/**
+	 * Führt einen Schreibtest mit allen Operationen aus this.queryList aus
+	 * und gibt die Dauer bis zum Ende der Operation zurück.
+	 * @return
+	 */
+	public double performWriteTestFromFile(int numberOfThreads)
+	{
+		return 0;
+		
+	}	
 	
 	/**
 	 * Berechne die Standardabweichung der Zeitmessungen über alle Queries.

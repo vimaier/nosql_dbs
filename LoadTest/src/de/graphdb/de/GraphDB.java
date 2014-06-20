@@ -63,6 +63,20 @@ public abstract class GraphDB {
 	public abstract void executeQuery(String query);
 	
 	/**
+	 * Liest einen Vertex mit dem Property 'name' aus vertexName 
+	 * aus der Datenbank.
+	 * @param vertexName
+	 */
+	public abstract void executeReadVertex(int vertexName);	
+	
+	/**
+	 * Schreibt einen Vertex mit dem Property 'name' aus vertexName 
+	 * in die Datenbank.
+	 * @param vertexName
+	 */
+	public abstract void executeWriteVertex(int vertexName);	
+	
+	/**
 	 * Wrapper nutzt this.loadFile und liest die Queries aus 
 	 * this.pathToTxtFileReadQueries in eine LinkedList ein und gibt 
 	 * diese zurück.
@@ -125,5 +139,6 @@ public abstract class GraphDB {
 	public void setClient(Object client) 
 	{
 		this.client = client;
-	}	
+	}
+
 }
