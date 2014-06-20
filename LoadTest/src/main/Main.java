@@ -20,7 +20,20 @@ public class Main {
 		//führe Lesetest durch
 		loadTest.performReadTest(1000);
 		
+		//gibt Report auf der Konsole aus
+		loadTest.printReport();
+		
+		//setze Testdaten zurück
+		loadTest.reset();
+		
 		//führe Schreibtest durch
 		loadTest.performWriteTest(1000);
+		
+		//gibt Report auf der Konsole aus
+		loadTest.printReport();		
+		
+		//setze Testdaten zurück
+		loadTest.reset();		
+		
 	}
 }

@@ -24,6 +24,12 @@ public class LoadTest {
 	private int numberOfThreads;
 	
 	/**
+	 * Entweder "Schreibtest" oder "Lesetest". Wir durch die perform-Methoden
+	 * gesetzt.
+	 */
+	private String action;
+	
+	/**
 	 * Zeitmessugnen der einzelnen Queries.
 	 */
 	LinkedList<Integer> elapsedTimes = new LinkedList<Integer>();
@@ -57,23 +63,22 @@ public class LoadTest {
 	}
 	
 	/**
-	 * Führt einen Lesetest mit Operationen aus und gibt die Dauer bis zum
-	 * Ende der Operation zurück.
+	 * Führt einen Lesetest mit Operationen aus und berechnet die 
+	 * Standardabweichung der Dauer über alle Operationen.
 	 * @return
 	 */
-	public double performReadTest(int numberOfThreads)
+	public void performReadTest(int numberOfThreads)
 	{
 		//Merke die Anzhal der Threads um das arithmetische Mittel zu 
 		//berechnen nachdem alle queries ausgeführt wurden.
 		this.numberOfThreads = numberOfThreads;
 		
-		//Stelle Verbindung zur Datenbank her.
-		graphDB.connect();
-			
+		this.action = "Lesetest";
+					
 		int vertexName = 1;
 		while(vertexName++ <= numberOfThreads)
 		{			
-			//Übergebe Ausführung der Query an Qorker-Thread und erhalte
+			//Übergebe Ausführung der Query an Worker-Thread und erhalte
 			//benötigte Zeit in Millisekunden.
 			long elapsedTime = new WorkerThread(graphDB)
 				.executeReadVertex(vertexName);
@@ -84,24 +89,21 @@ public class LoadTest {
 		
 		//berechne Standardabweichung
 		this.calcStandardabweichung();
-				
-		return 0;
 	}
 	
 	/**
 	 * Führt einen Lesetest mit allen Operationen aus this.queryList aus
-	 * und gibt die Dauer bis zum Ende der Operation zurück.
+	 * und berechnet die Standardabweichung der Dauer über alle Operationen.
 	 * @return
 	 */
-	public double performReadTestFromFile(int numberOfThreads)
+	public void performReadTestFromFile(int numberOfThreads)
 	{
 		//Merke die Anzhal der Threads um das arithmetische Mittel zu 
 		//berechnen nachdem alle queries ausgeführt wurden.
 		this.numberOfThreads = numberOfThreads;
 		
-		//Stelle Verbindung zur Datenbank her.
-		graphDB.connect();
-		
+		this.action = "Lesetest";		
+				
 		//lade spezifische Datenbank-Queries in den Speicher.
 		this.queryList = graphDB.loadReadQueries();
 		
@@ -111,7 +113,7 @@ public class LoadTest {
 		{
 			String query = it.next();
 			
-			//Übergebe Ausführung der Query an Qorker-Thread und erhalte
+			//Übergebe Ausführung der Query an Worker-Thread und erhalte
 			//benötigte Zeit in Millisekunden.
 			long elapsedTime = new WorkerThread(graphDB)
 				.executeQuery(query);
@@ -122,30 +124,70 @@ public class LoadTest {
 		
 		//berechne Standardabweichung
 		this.calcStandardabweichung();
-				
-		return 0;
 	}
 	
 	/**
-	 * Führt einen Schreibtest mit Operationen aus und gibt die Dauer bis 
-	 * zum Ende der Operation zurück.
+	 * Führt einen Schreibtest mit Operationen aus  
+	 * und berechnet die Standardabweichung der Dauer über alle Operationen.
 	 * @return
 	 */
-	public double performWriteTest(int numberOfThreads)
+	public void performWriteTest(int numberOfThreads)
 	{
-		return 0;
+		//Merke die Anzhal der Threads um das arithmetische Mittel zu 
+		//berechnen nachdem alle queries ausgeführt wurden.
+		this.numberOfThreads = numberOfThreads;
 		
+		this.action = "Schreibtest";		
+					
+		int vertexName = 1;
+		while(vertexName++ <= numberOfThreads)
+		{			
+			//Übergebe Ausführung der Query an Worker-Thread und erhalte
+			//benötigte Zeit in Millisekunden.
+			long elapsedTime = new WorkerThread(graphDB)
+				.executeWriteVertex(vertexName);
+			
+			//Füge Zeitmessung zum Array mit allen Zeiten hinzu
+			this.elapsedTimes.add((int) elapsedTime);			
+		}
+		
+		//berechne Standardabweichung
+		this.calcStandardabweichung();
 	}
 	
 	/**
 	 * Führt einen Schreibtest mit allen Operationen aus this.queryList aus
-	 * und gibt die Dauer bis zum Ende der Operation zurück.
+	 * und berechnet die Standardabweichung der Dauer über alle Operationen.
 	 * @return
 	 */
-	public double performWriteTestFromFile(int numberOfThreads)
+	public void performWriteTestFromFile(int numberOfThreads)
 	{
-		return 0;
+		//Merke die Anzhal der Threads um das arithmetische Mittel zu 
+		//berechnen nachdem alle queries ausgeführt wurden.
+		this.numberOfThreads = numberOfThreads;
 		
+		this.action = "Schreibtest";		
+				
+		//lade spezifische Datenbank-Queries in den Speicher.
+		this.queryList = graphDB.loadWriteQueries();
+		
+		Iterator<String> it = this.queryList.iterator();
+		
+		while(true == it.hasNext())
+		{
+			String query = it.next();
+			
+			//Übergebe Ausführung der Query an Worker-Thread und erhalte
+			//benötigte Zeit in Millisekunden.
+			long elapsedTime = new WorkerThread(graphDB)
+				.executeQuery(query);
+			
+			//Füge Zeitmessung zum Array mit allen Zeiten hinzu
+			this.elapsedTimes.add((int) elapsedTime);			
+		}
+		
+		//berechne Standardabweichung
+		this.calcStandardabweichung();
 	}	
 	
 	/**
@@ -158,12 +200,9 @@ public class LoadTest {
 		for (int elapsedTime : this.elapsedTimes) {
 			this.elapsedTimeTotal += elapsedTime;
 		}
-		System.out.println("Gesamtzeit: " + this.elapsedTimeTotal);
 		
 		//berechne arithmetisches Mittel über die Messungen aller Queries.
 		this.arithmetischesMittel = this.elapsedTimeTotal / numberOfThreads; 
-		System.out.println("Arithmetisches Mittel: " 
-				+ this.arithmetischesMittel);
 		
 		//berechne die Varianz
 		double tmp = 0;
@@ -172,10 +211,49 @@ public class LoadTest {
 					elapsedTime - this.arithmetischesMittel, 2);
 		}
 		this.varianz = tmp / this.numberOfThreads;
+	
+		//berechne Standardabweichung 
+		this.standardabweichung = Math.sqrt(this.varianz / numberOfThreads);			
+	}
+	
+	/**
+	 * Setzt Testdaten zurück.
+	 */
+	public void reset()
+	{
+		this.elapsedTimes = new LinkedList<Integer>();		
+		this.arithmetischesMittel = 0.0;
+		this.elapsedTimeTotal = 0;
+		this.standardabweichung = 0.0;
+		this.varianz = 0.0;
+	}
+	
+	/**
+	 * Gibt das Ergebnis eines Tests auf die Konsole aus.
+	 */
+	public void printReport()
+	{
+		//Action und Datenbankname
+		System.out.println(this.action + " für " 
+				+ this.graphDB.getDatabaseName());
+		
+		//Anzahl der Threads
+		System.out.println("Anzahl Threads gestartet: " 
+				+ this.numberOfThreads);
+		
+		//Vergangene Gesamtzeit
+		System.out.println("Gesamtzeit: " + this.elapsedTimeTotal);		
+		
+		//Arithmetisches Mittel der Gesamtzeit
+		System.out.println("Arithmetisches Mittel: " 
+				+ this.arithmetischesMittel);	
+		
+		//Varianz
 		System.out.println("Varianz: " + this.varianz);
 		
-		//berechne Standardabweichung 
-		this.standardabweichung = Math.sqrt(this.varianz / numberOfThreads);
-		System.out.println("Standardabweichung: " + this.standardabweichung);			
+		//Standardabweichung aller Anfragen dieses Tests
+		System.out.println("Standardabweichung: " + this.standardabweichung);
+		
+		System.out.println("\n==========================================\n");
 	}
 }

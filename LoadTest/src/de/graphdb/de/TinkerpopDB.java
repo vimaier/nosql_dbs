@@ -51,6 +51,9 @@ public class TinkerpopDB extends GraphDB
 	{
 		//lese Knoten mit property 'name' und Wert vertexName aus der 
 		//Datenbank aus
+		
+		//mache irgendwas zum Testen...
+	    for (long i = 0; i < 10000000l; i++) {}				
 	}
 
 	@Override
@@ -58,5 +61,8 @@ public class TinkerpopDB extends GraphDB
 	{
 		//Füge Knoten mit Property 'name' und Wert aus vertexName in die 
 		//Datenbank ein
+		
+		//mache irgendwas zum Testen...
+	    for (long i = 0; i < 10000000l; i++) {}				
 	}
 }

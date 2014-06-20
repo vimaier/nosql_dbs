@@ -146,4 +146,10 @@ public abstract class GraphDB {
 		this.client = client;
 	}
 
+	/**
+	 * @return the databaseName
+	 */
+	public String getDatabaseName() {
+		return databaseName;
+	}
 }
