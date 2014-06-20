@@ -32,6 +32,12 @@ public class TinkerpopDB extends GraphDB
 	}	
 
 	@Override
+	public void clearDatabase() 
+	{
+		//lösche alle Datenbankeinträge
+	}	
+	
+	@Override
 	public void executeQuery(String query)
 	{
 		//Führe Query aus query in Datenbank aus
@@ -52,7 +58,5 @@ public class TinkerpopDB extends GraphDB
 	{
 		//Füge Knoten mit Property 'name' und Wert aus vertexName in die 
 		//Datenbank ein
-	}	
-
-
+	}
 }

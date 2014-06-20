@@ -20,6 +20,11 @@ public class Neo4jDB extends GraphDB
 	public void disconnect() {
 		//schließe Datenbankverbindung
 	}
+	
+	@Override
+	public void clearDatabase() {
+		//lösche alle Datenbankeinträge		
+	}	
 
 	@Override
 	public void executeQuery(String query) {
@@ -37,5 +42,4 @@ public class Neo4jDB extends GraphDB
 		//Füge Knoten mit Property 'name' und Wert aus vertexName in die 
 		//Datenbank ein
 	}
-
 }

@@ -20,6 +20,11 @@ public class OrientDB extends GraphDB
 	public void disconnect() {
 		//schließe Datenbankverbindung
 	}
+	
+	@Override
+	public void clearDatabase() {
+		//lösche alle Datenbankeinträge		
+	}	
 
 	@Override
 	public void executeQuery(String query) {

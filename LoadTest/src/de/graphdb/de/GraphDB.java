@@ -56,6 +56,11 @@ public abstract class GraphDB {
 	 * Schließt die Verbindung zur Datenbank.
 	 */
 	public abstract void disconnect();
+	
+	/**
+	 * Löscht alle Einträge in der Datenbank.
+	 */
+	public abstract void clearDatabase();
 		
 	/**
 	 * Führt eine Query über this.client aus.
