@@ -1,0 +1,4 @@
+anzThreads, gesamtzeit, mittel, varianz, abweichung
+1000, 6940, 6.0, 1.122, 0.03349626844888846, 
+anzThreads, gesamtzeit, mittel, varianz, abweichung
+1000, 7249, 7.0, 1.089, 0.033, 

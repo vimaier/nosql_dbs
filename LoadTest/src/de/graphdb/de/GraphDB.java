@@ -116,24 +116,30 @@ public abstract class GraphDB {
 	protected LinkedList<String> loadFile(Path path)
 	{
 		LinkedList<String> linkedList = new LinkedList<String>();	    
-	    BufferedReader reader;
+		BufferedReader reader = null;
 	    
 	    try
-	    {	    		    
+	    {	    	
 			reader = Files.newBufferedReader(path, FILE_ENCODING);
 					
 			String line = null;
 			while ((line = reader.readLine()) != null) 
 			{
 			  linkedList.add(line);
-			}   
-			
-			reader.close();
+			}   					
 	    } 
 	    catch (IOException e) 
 	    {
 			e.printStackTrace();
 		}
+	    finally
+	    {
+	    	try {
+				reader.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+	    }
 	
 		return linkedList;
 	}

@@ -1,5 +1,12 @@
 package loadTest;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -255,5 +262,48 @@ public class LoadTest {
 		System.out.println("Standardabweichung: " + this.standardabweichung);
 		
 		System.out.println("\n==========================================\n");
+	}
+	
+	/**
+	 * Füge den Report einer CSV-Datei hinzu.
+	 */
+	public void reportToCsv(String pathToCsvFile)
+	{
+		try 
+		{
+	        File reportFile = new File(pathToCsvFile);
+	        
+	        FileOutputStream os = new FileOutputStream(reportFile, true);
+	        OutputStreamWriter osw = new OutputStreamWriter(os);    
+	        Writer writer = new BufferedWriter(osw);
+	        
+	        //Schreibe Header
+	        //writer.write("anzThreads, ");
+	        //writer.write("gesamtzeit, ");
+	        //writer.write("mittel, ");
+	        //writer.write("varianz, ");
+	        //writer.write("abweichung");
+	        //writer.write("\n");
+	        
+	        //schreibe Daten
+	        writer.write(this.numberOfThreads + ", ");
+	        writer.write(this.elapsedTimeTotal + ", ");
+	        writer.write(this.arithmetischesMittel + ", ");
+	        writer.write(this.varianz + ", ");
+	        writer.write(this.standardabweichung + "");
+	        writer.write("\n");
+	        
+	        writer.close();
+	       
+	    } catch (IOException e) {
+	        System.err.println("Problem writing to the file statsTest.txt");
+	    }
+	}
+
+	/**
+	 * @return the action
+	 */
+	public String getAction() {
+		return action;
 	}
 }

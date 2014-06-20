@@ -8,7 +8,7 @@ public class TinkerpopDB extends GraphDB
 	 */
 	public TinkerpopDB()
 	{
-		this.databaseName = "Tinkerpop, TinkerGraph";
+		this.databaseName = "Tinkerpop-TinkerGraph";
 		
 		//Setze Pfad zum Text-File mit den Leseperationen
 		this.pathToTxtFileReadQueries = "/home/cls/workspaces/eclipsejee/"

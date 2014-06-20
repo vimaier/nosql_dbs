@@ -10,18 +10,26 @@ public class Main {
 	public static void main(String[] args) 
 	{
 		//Erstelle Datenbank-Objekte
-		TinkerpopDB tinkerpopDB = new TinkerpopDB();
-		Neo4jDB neo4jDB = new Neo4jDB();
-		OrientDB orientDB = new OrientDB();
+		TinkerpopDB graphDB = new TinkerpopDB();
+		//Neo4jDB graphDB = new Neo4jDB();
+		//OrientDB graphDB = new OrientDB();
 		
 		//Erstelle LoadTest-Objekt
-		LoadTest loadTest = new LoadTest(tinkerpopDB);
+		LoadTest loadTest = new LoadTest(graphDB);
 		
 		//führe Lesetest durch
 		loadTest.performReadTest(1000);
 		
 		//gibt Report auf der Konsole aus
 		loadTest.printReport();
+		
+		//fügt Report einer CSV Datei hinzu
+		loadTest.reportToCsv("/home/cls/workspaces/eclipsejee/"
+				+ "nosql_dbs/LoadTest/src/reports/"
+				+ graphDB.getDatabaseName().toLowerCase() 
+				+ "-" + loadTest.getAction()
+				//+ "-" + System.currentTimeMillis() 
+				+ ".txt");
 		
 		//setze Testdaten zurück
 		loadTest.reset();
