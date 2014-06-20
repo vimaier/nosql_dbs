@@ -269,13 +269,16 @@ public class LoadTest {
 	 */
 	public void reportToCsv(String pathToCsvFile)
 	{
+		
+		Writer writer = null;
+		
 		try 
 		{
 	        File reportFile = new File(pathToCsvFile);
 	        
 	        FileOutputStream os = new FileOutputStream(reportFile, true);
 	        OutputStreamWriter osw = new OutputStreamWriter(os);    
-	        Writer writer = new BufferedWriter(osw);
+	        writer = new BufferedWriter(osw);
 	        
 	        //Schreibe Header
 	        //writer.write("anzThreads, ");
@@ -292,12 +295,20 @@ public class LoadTest {
 	        writer.write(this.varianz + ", ");
 	        writer.write(this.standardabweichung + "");
 	        writer.write("\n");
-	        
-	        writer.close();
-	       
-	    } catch (IOException e) {
-	        System.err.println("Problem writing to the file statsTest.txt");
+	               
+	    } 
+		catch (IOException e) 
+	    {
+	        e.printStackTrace();
 	    }
+		finally
+		{
+			try {
+				writer.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	/**
