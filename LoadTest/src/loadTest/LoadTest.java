@@ -144,7 +144,10 @@ public class LoadTest {
 		//berechnen nachdem alle queries ausgeführt wurden.
 		this.numberOfThreads = numberOfThreads;
 		
-		this.action = "Schreibtest";		
+		this.action = "Schreibtest";	
+		
+		//clear Database to start empty
+		this.graphDB.clearDatabase();
 					
 		int vertexName = 1;
 		while(vertexName++ <= numberOfThreads)
@@ -173,7 +176,10 @@ public class LoadTest {
 		//berechnen nachdem alle queries ausgeführt wurden.
 		this.numberOfThreads = numberOfThreads;
 		
-		this.action = "Schreibtest";		
+		this.action = "Schreibtest";	
+		
+		//clear Database to start empty
+		this.graphDB.clearDatabase();		
 				
 		//lade spezifische Datenbank-Queries in den Speicher.
 		this.queryList = graphDB.loadWriteQueries();
@@ -249,17 +255,18 @@ public class LoadTest {
 				+ this.numberOfThreads);
 		
 		//Vergangene Gesamtzeit
-		System.out.println("Gesamtzeit: " + this.elapsedTimeTotal);		
+		System.out.println("Gesamtzeit: " + this.elapsedTimeTotal + " ms");		
 		
 		//Arithmetisches Mittel der Gesamtzeit
 		System.out.println("Arithmetisches Mittel: " 
-				+ this.arithmetischesMittel);	
+				+ this.arithmetischesMittel + " ms");	
 		
 		//Varianz
-		System.out.println("Varianz: " + this.varianz);
+		System.out.println("Varianz: " + this.varianz + " ms");
 		
 		//Standardabweichung aller Anfragen dieses Tests
-		System.out.println("Standardabweichung: " + this.standardabweichung);
+		System.out.println("Standardabweichung: " + this.standardabweichung 
+				+ " ms");
 		
 		System.out.println("\n==========================================\n");
 	}
@@ -281,12 +288,12 @@ public class LoadTest {
 	        writer = new BufferedWriter(osw);
 	        
 	        //Schreibe Header
-	        //writer.write("anzThreads, ");
-	        //writer.write("gesamtzeit, ");
-	        //writer.write("mittel, ");
-	        //writer.write("varianz, ");
-	        //writer.write("abweichung");
-	        //writer.write("\n");
+	        writer.write("anzThreads, ");
+	        writer.write("gesamtzeit, ");
+	        writer.write("mittel, ");
+	        writer.write("varianz, ");
+	        writer.write("abweichung");
+	        writer.write("\n");
 	        
 	        //schreibe Daten
 	        writer.write(this.numberOfThreads + ", ");
