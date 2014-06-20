@@ -504,13 +504,6 @@ public class OrientDbDao implements GraphDBInterface {
   }
 
   @Override
-  public Collection<UserDTO> findRelative(UserDTO user) {
-    // Actually, there is no such method to create a realtionship or properie
-    // for relatives
-    return null;
-  }
-
-  @Override
   public UserDTO loginUser(LoginDTO login) {
     if (login == null) {
       log.debug("Recieved recieved empty login-object");

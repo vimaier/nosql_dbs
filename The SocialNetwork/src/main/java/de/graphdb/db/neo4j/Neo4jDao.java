@@ -171,12 +171,6 @@ public class Neo4jDao implements GraphDBInterface {
 		return null;
 	}
 
-	@Override
-	public Collection<UserDTO> findRelative(UserDTO user) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
   @Override
   public UserDTO loginUser(LoginDTO login) {
     // TODO Auto-generated method stub

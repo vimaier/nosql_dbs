@@ -77,6 +77,10 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 			}
 		return queryEngine;
 	}
+	
+	public void executeCypherQuery(final String cypherQuery) {
+		getQueryEngine().query(cypherQuery, null);
+	}
 
 	@Override
 	public boolean insertUser(UserDTO user) {
@@ -294,11 +298,6 @@ public class Neo4jDaoWithWrappedRest implements GraphDBInterface {
 		return friendsOfFriends;
 	}
 
-	@Override
-	public Collection<UserDTO> findRelative(UserDTO user) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	private UserDTO createUserFromNode(Node node) {
 		UserDTO userDTO = new UserDTO(

@@ -1,0 +1,47 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>LoadTest</groupId>
+  <artifactId>LoadTest</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <!-- For neo4j-rest-graphdb -->
+  <repositories>
+	<repository>
+		<id>Neo4J Repo</id>
+		<url>http://m2.neo4j.org/releases</url>
+	</repository>
+  </repositories>
+  <build>
+    <sourceDirectory>src</sourceDirectory>
+    <resources>
+      <resource>
+        <directory>src</directory>
+        <excludes>
+          <exclude>**/*.java</exclude>
+        </excludes>
+      </resource>
+    </resources>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.1</version>
+        <configuration>
+          <source>1.7</source>
+          <target>1.7</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+  	<!-- Neo4j REST -->
+	<dependency>
+		<groupId>org.neo4j</groupId>
+		<artifactId>neo4j-rest-graphdb</artifactId>
+		<version>1.8.M07</version>
+	</dependency>
+	<dependency>
+		<groupId>com.sun.jersey</groupId>
+		<artifactId>jersey-bundle</artifactId>
+		<version>1.18.1</version>
+	</dependency>
+  </dependencies>
+</project>
