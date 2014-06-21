@@ -11,6 +11,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import de.graphdb.de.GraphDB;
+import de.graphdb.de.Neo4jDB;
+import de.graphdb.de.OrientDB;
+import de.graphdb.de.TinkerpopDB;
 
 public class LoadTest {
 
@@ -31,36 +34,11 @@ public class LoadTest {
 	private int numberOfThreads;
 	
 	/**
-	 * Entweder "Schreibtest" oder "Lesetest". Wir durch die perform-Methoden
-	 * gesetzt.
+	 * Messdatenobjekt speichert die Messdaten, berechnet die Ergebniswerte
+	 * und erstellt die Reports.
 	 */
-	private String action;
-	
-	/**
-	 * Zeitmessugnen der einzelnen Queries.
-	 */
-	LinkedList<Integer> elapsedTimes = new LinkedList<Integer>();
-	
-	/**
-	 * Zeit die während eines Tests vergangen ist.
-	 */
-	private long elapsedTimeTotal = 0;
-	
-	/**
-	 * Aritmetisches Mittel über alle Zeitmessungen
-	 */
-	private double arithmetischesMittel = 0.0;
-	
-	/**
-	 * Varianz aller Zeitmessungen.
-	 */
-	private double varianz = 0.0;
-	
-	/**
-	 * Standardabweichung aller Messungen.
-	 */
-	private double standardabweichung = 0.0;
-	
+	private MeasurementData measurement;
+		
 	/**
 	 * Konstruktor
 	 */
@@ -80,22 +58,23 @@ public class LoadTest {
 		//berechnen nachdem alle queries ausgeführt wurden.
 		this.numberOfThreads = numberOfThreads;
 		
-		this.action = "Lesetest";
+		//Erstelle neues Messobjekt zum Messen der Performance
+		this.measurement = new MeasurementData(
+				this.numberOfThreads, 
+				this.graphDB.getDatabaseName(),
+				"Lesetest");
 					
 		int vertexName = 1;
 		while(vertexName++ <= numberOfThreads)
 		{			
+			//erzeuge neues DatenbankObjekt abhängig vom typ von this.graphDB
+			GraphDB g = createNewDBObject();
+			
 			//Übergebe Ausführung der Query an Worker-Thread und erhalte
 			//benötigte Zeit in Millisekunden.
-			long elapsedTime = new WorkerThread(graphDB)
-				.executeReadVertex(vertexName);
-			
-			//Füge Zeitmessung zum Array mit allen Zeiten hinzu
-			this.elapsedTimes.add((int) elapsedTime);			
+			new WorkerThreadRead(g, vertexName, this.measurement).start();
+						
 		}
-		
-		//berechne Standardabweichung
-		this.calcStandardabweichung();
 	}
 	
 	/**
@@ -107,12 +86,16 @@ public class LoadTest {
 	{
 		//Merke die Anzhal der Threads um das arithmetische Mittel zu 
 		//berechnen nachdem alle queries ausgeführt wurden.
-		this.numberOfThreads = numberOfThreads;
+		this.numberOfThreads = numberOfThreads;		
 		
-		this.action = "Lesetest";		
+		//Erstelle neues Messobjekt zum Messen der Performance
+		this.measurement = new MeasurementData(
+				this.numberOfThreads, 
+				this.graphDB.getDatabaseName(),
+				"Lesetest");		
 				
 		//lade spezifische Datenbank-Queries in den Speicher.
-		this.queryList = graphDB.loadReadQueries();
+		this.queryList = this.graphDB.loadReadQueries();
 		
 		Iterator<String> it = this.queryList.iterator();
 		
@@ -120,17 +103,13 @@ public class LoadTest {
 		{
 			String query = it.next();
 			
+			//erzeuge neues DatenbankObjekt abhängig vom typ von this.graphDB
+			GraphDB g = createNewDBObject();
+			
 			//Übergebe Ausführung der Query an Worker-Thread und erhalte
 			//benötigte Zeit in Millisekunden.
-			long elapsedTime = new WorkerThread(graphDB)
-				.executeQuery(query);
-			
-			//Füge Zeitmessung zum Array mit allen Zeiten hinzu
-			this.elapsedTimes.add((int) elapsedTime);			
+			new WorkerThreadQuery(g, query, this.measurement).start();			
 		}
-		
-		//berechne Standardabweichung
-		this.calcStandardabweichung();
 	}
 	
 	/**
@@ -144,7 +123,11 @@ public class LoadTest {
 		//berechnen nachdem alle queries ausgeführt wurden.
 		this.numberOfThreads = numberOfThreads;
 		
-		this.action = "Schreibtest";	
+		//Erstelle neues Messobjekt zum Messen der Performance
+		this.measurement = new MeasurementData(
+				this.numberOfThreads, 
+				this.graphDB.getDatabaseName(),
+				"Schreibtest");	
 		
 		//clear Database to start empty
 		this.graphDB.clearDatabase();
@@ -152,17 +135,13 @@ public class LoadTest {
 		int vertexName = 1;
 		while(vertexName++ <= numberOfThreads)
 		{			
+			//erzeuge neues DatenbankObjekt abhängig vom typ von this.graphDB
+			GraphDB g = createNewDBObject();
+			
 			//Übergebe Ausführung der Query an Worker-Thread und erhalte
 			//benötigte Zeit in Millisekunden.
-			long elapsedTime = new WorkerThread(graphDB)
-				.executeWriteVertex(vertexName);
-			
-			//Füge Zeitmessung zum Array mit allen Zeiten hinzu
-			this.elapsedTimes.add((int) elapsedTime);			
+			new WorkerThreadWrite(g, vertexName, this.measurement).start();		
 		}
-		
-		//berechne Standardabweichung
-		this.calcStandardabweichung();
 	}
 	
 	/**
@@ -176,13 +155,17 @@ public class LoadTest {
 		//berechnen nachdem alle queries ausgeführt wurden.
 		this.numberOfThreads = numberOfThreads;
 		
-		this.action = "Schreibtest";	
+		//Erstelle neues Messobjekt zum Messen der Performance
+		this.measurement = new MeasurementData(
+				this.numberOfThreads, 
+				this.graphDB.getDatabaseName(),
+				"Schreibtest");	
 		
 		//clear Database to start empty
 		this.graphDB.clearDatabase();		
 				
 		//lade spezifische Datenbank-Queries in den Speicher.
-		this.queryList = graphDB.loadWriteQueries();
+		this.queryList = this.graphDB.loadWriteQueries();
 		
 		Iterator<String> it = this.queryList.iterator();
 		
@@ -190,138 +173,34 @@ public class LoadTest {
 		{
 			String query = it.next();
 			
+			//erzeuge neues DatenbankObjekt abhängig vom typ von this.graphDB
+			GraphDB g = createNewDBObject();			
+			
 			//Übergebe Ausführung der Query an Worker-Thread und erhalte
 			//benötigte Zeit in Millisekunden.
-			long elapsedTime = new WorkerThread(graphDB)
-				.executeQuery(query);
-			
-			//Füge Zeitmessung zum Array mit allen Zeiten hinzu
-			this.elapsedTimes.add((int) elapsedTime);			
+			new WorkerThreadQuery(g, query, this.measurement).start();					
 		}
-		
-		//berechne Standardabweichung
-		this.calcStandardabweichung();
-	}	
-	
-	/**
-	 * Berechne die Standardabweichung der Zeitmessungen über alle Queries.
-	 * @return Standardabweichung
-	 */
-	private void calcStandardabweichung()
-	{
-		//Summiere Zeiten der einzelnen Queries
-		for (int elapsedTime : this.elapsedTimes) {
-			this.elapsedTimeTotal += elapsedTime;
-		}
-		
-		//berechne arithmetisches Mittel über die Messungen aller Queries.
-		this.arithmetischesMittel = this.elapsedTimeTotal / numberOfThreads; 
-		
-		//berechne die Varianz
-		double tmp = 0;
-		for (int elapsedTime : this.elapsedTimes) {
-			tmp += Math.pow(
-					elapsedTime - this.arithmetischesMittel, 2);
-		}
-		this.varianz = tmp / this.numberOfThreads;
-	
-		//berechne Standardabweichung 
-		this.standardabweichung = Math.sqrt(this.varianz / numberOfThreads);			
 	}
 	
 	/**
-	 * Setzt Testdaten zurück.
+	 * Gibt ein neues DatenbankObjekt mit neuem Client zurück.
+	 * @return
 	 */
-	public void reset()
+	private GraphDB createNewDBObject()
 	{
-		this.elapsedTimes = new LinkedList<Integer>();		
-		this.arithmetischesMittel = 0.0;
-		this.elapsedTimeTotal = 0;
-		this.standardabweichung = 0.0;
-		this.varianz = 0.0;
-	}
-	
-	/**
-	 * Gibt das Ergebnis eines Tests auf die Konsole aus.
-	 */
-	public void printReport()
-	{
-		//Action und Datenbankname
-		System.out.println(this.action + " für " 
-				+ this.graphDB.getDatabaseName());
-		
-		//Anzahl der Threads
-		System.out.println("Anzahl Threads gestartet: " 
-				+ this.numberOfThreads);
-		
-		//Vergangene Gesamtzeit
-		System.out.println("Gesamtzeit: " + this.elapsedTimeTotal + " ms");		
-		
-		//Arithmetisches Mittel der Gesamtzeit
-		System.out.println("Arithmetisches Mittel: " 
-				+ this.arithmetischesMittel + " ms");	
-		
-		//Varianz
-		System.out.println("Varianz: " + this.varianz + " ms");
-		
-		//Standardabweichung aller Anfragen dieses Tests
-		System.out.println("Standardabweichung: " + this.standardabweichung 
-				+ " ms");
-		
-		System.out.println("\n==========================================\n");
-	}
-	
-	/**
-	 * Füge den Report einer CSV-Datei hinzu.
-	 */
-	public void reportToCsv(String pathToCsvFile)
-	{
-		
-		Writer writer = null;
-		
-		try 
+		if(true == (this.graphDB instanceof TinkerpopDB))
 		{
-	        File reportFile = new File(pathToCsvFile);
-	        
-	        FileOutputStream os = new FileOutputStream(reportFile, true);
-	        OutputStreamWriter osw = new OutputStreamWriter(os);    
-	        writer = new BufferedWriter(osw);
-	        
-	        //Schreibe Header
-	        writer.write("anzThreads, ");
-	        writer.write("gesamtzeit, ");
-	        writer.write("mittel, ");
-	        writer.write("varianz, ");
-	        writer.write("abweichung");
-	        writer.write("\n");
-	        
-	        //schreibe Daten
-	        writer.write(this.numberOfThreads + ", ");
-	        writer.write(this.elapsedTimeTotal + ", ");
-	        writer.write(this.arithmetischesMittel + ", ");
-	        writer.write(this.varianz + ", ");
-	        writer.write(this.standardabweichung + "");
-	        writer.write("\n");
-	               
-	    } 
-		catch (IOException e) 
-	    {
-	        e.printStackTrace();
-	    }
-		finally
-		{
-			try {
-				writer.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			return new TinkerpopDB();
 		}
-	}
-
-	/**
-	 * @return the action
-	 */
-	public String getAction() {
-		return action;
+		else if(true == (this.graphDB instanceof Neo4jDB))
+		{
+			return new Neo4jDB();
+		}
+		else if(true == (this.graphDB instanceof OrientDB))
+		{
+			return new OrientDB();
+		}
+		
+		return null;
 	}
 }

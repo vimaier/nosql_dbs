@@ -22,62 +22,10 @@ public class Main {
 		//Erstelle LoadTest-Objekt
 		LoadTest loadTest = new LoadTest(graphDB);
 		
-		performWriteTest(loadTest, graphDB, THREADS);
-		
-		//setze Messdaten zurück
-		loadTest.reset();
-		
-		performReadTest(loadTest, graphDB, THREADS);
-		
-		//setze Messdaten zurück
-		loadTest.reset();		
-	}
-	
-	/**
-	 * Führe Schreibtest durch.
-	 * @param loadTest
-	 * @param graphDB
-	 * @param threads
-	 */
-	public static void performWriteTest(
-			LoadTest loadTest, 
-			GraphDB graphDB,
-			int threads)
-	{
 		//führe Schreibtest durch
-		loadTest.performWriteTest(threads);
+		//loadTest.performWriteTest(3);
 		
-		//gibt Report auf der Konsole aus
-		loadTest.printReport();
-		
-		//fügt Report einer CSV Datei hinzu
-		loadTest.reportToCsv("/home/cls/workspaces/eclipsejee/"
-				+ "nosql_dbs/LoadTest/src/reports/"
-				+ graphDB.getDatabaseName().toLowerCase() 
-				+ "-" + loadTest.getAction() + ".txt");
-	}
-	
-	/**
-	 * Führe Schreibtest durch.
-	 * @param loadTest
-	 * @param graphDB
-	 * @param threads
-	 */
-	public static void performReadTest(
-			LoadTest loadTest, 
-			GraphDB graphDB,
-			int threads)
-	{
 		//führe Lesetest durch
-		loadTest.performReadTest(threads);
-		
-		//gibt Report auf der Konsole aus
-		loadTest.printReport();
-		
-		//fügt Report einer CSV Datei hinzu
-		loadTest.reportToCsv("/home/cls/workspaces/eclipsejee/"
-				+ "nosql_dbs/LoadTest/src/reports/"
-				+ graphDB.getDatabaseName().toLowerCase() 
-				+ "-" + loadTest.getAction() + ".txt");
+		loadTest.performReadTest(2);	
 	}
 }
