@@ -5,7 +5,7 @@ import de.graphdb.db.neo4j.Neo4jDaoWithWrappedRest;
 public class Neo4jDB extends GraphDB
 {
 	
-	private static Neo4jDaoWithWrappedRest neo4jDao = null;
+	private Neo4jDaoWithWrappedRest neo4jDao = null;
 	
 	/**
 	 * Konstruktor
@@ -29,10 +29,15 @@ public class Neo4jDB extends GraphDB
 	
 	@Override
 	public void clearDatabase() {
+		
+		this.connect();
+		
 		final String queryToDeleteAllEdges = "MATCH (n)-[r]-() DELETE r";
 		final String queryToDeleteAllVertices = "MATCH (n) DELETE n";
 		neo4jDao.executeCypherQuery(queryToDeleteAllEdges);
 		neo4jDao.executeCypherQuery(queryToDeleteAllVertices);
+		
+		this.disconnect();
 	}	
 
 	@Override
