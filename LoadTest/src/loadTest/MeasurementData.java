@@ -137,17 +137,26 @@ public class MeasurementData
 		{
 	        File reportFile = new File(pathToCsvFile);
 	        
+	        boolean fileExists = false;
+	        if(reportFile.exists() && false == reportFile.isDirectory())
+	        {
+	        	fileExists = true;
+	        }
+	        
 	        FileOutputStream os = new FileOutputStream(reportFile, true);
 	        OutputStreamWriter osw = new OutputStreamWriter(os);    
 	        writer = new BufferedWriter(osw);
 	        
-	        //Schreibe Header
-	        writer.write("anzThreads, ");
-	        writer.write("gesamtzeit, ");
-	        writer.write("mittel, ");
-	        writer.write("varianz, ");
-	        writer.write("abweichung");
-	        writer.write("\n");
+	        if(false == fileExists)
+	        {
+		        //Schreibe Header
+		        writer.write("anzThreads, ");
+		        writer.write("gesamtzeit, ");
+		        writer.write("mittel, ");
+		        writer.write("varianz, ");
+		        writer.write("abweichung");
+		        writer.write("\n");
+	        }
 	        
 	        //schreibe Daten
 	        writer.write(this.numberOfThreads + ", ");
