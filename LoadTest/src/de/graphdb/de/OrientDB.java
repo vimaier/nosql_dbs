@@ -1,46 +1,107 @@
 package de.graphdb.de;
 
-public class OrientDB extends GraphDB 
-{
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-	/**
-	 * Konstruktor
-	 */
-	public OrientDB()
-	{
-		this.databaseName = "OrientDB";
-	}
-	
-	@Override
-	public void connect() {
-		//verbinde zur Datenbank und speichere client in this.client
-	}
+import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery;
+import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 
-	@Override
-	public void disconnect() {
-		//schließe Datenbankverbindung
-	}
-	
-	@Override
-	public void clearDatabase() {
-		//lösche alle Datenbankeinträge		
-	}	
+import de.graphdb.db.orientdb.OrientDbConnection;
 
-	@Override
-	public void executeQuery(String query) {
-		//Führe Query aus query in Datenbank aus
-	}
+public class OrientDB extends GraphDB {
 
-	@Override
-	public void executeReadVertex(int vertexName) {
-		//lese Knoten mit property 'name' und Wert vertexName aus aus der 
-		//Datenbank aus
-	}
+  private static Logger log = LoggerFactory.getLogger(OrientDB.class);
 
-	@Override
-	public void executeWriteVertex(int vertexName) {
-		//Füge Knoten mit Property 'name' und Wert aus vertexName in die 
-		//Datenbank ein
-	}
+  /**
+   * Konstruktor
+   */
+  public OrientDB() {
+    super.databaseName = "OrientDB";
+  }
+
+  @Override
+  public void connect() {
+    super.client = OrientDbConnection.getInstance();
+  }
+
+  @Override
+  public void disconnect() {
+    ((OrientDbConnection) super.client).close();
+  }
+
+  @Override
+  public void clearDatabase() {
+    OrientGraph g = getGraph();
+    if (g != null) {
+      try {
+        /**
+         * TODO
+         */
+        g.commit();
+      } catch (Exception e) {
+        log.error("executeQuery");
+        g.rollback();
+      } finally {
+        g.shutdown();
+      }
+    }
+  }
+
+  @Override
+  public void executeQuery(String query) {
+    OrientGraph g = getGraph();
+    if (g != null) {
+      try {
+        g.command(new OSQLSynchQuery<Vertex>(query)).execute();
+        g.commit();
+      } catch (Exception e) {
+        log.error("executeQuery");
+        g.rollback();
+      } finally {
+        g.shutdown();
+      }
+    }
+  }
+
+  @Override
+  public void executeReadVertex(int vertexName) {
+    OrientGraph g = getGraph();
+    if (g != null) {
+      try {
+        g.getVertex(vertexName);
+        g.commit();
+      } catch (Exception e) {
+        log.error("Error executeReadVertex with vertexName=" + vertexName);
+        g.rollback();
+      } finally {
+        g.shutdown();
+      }
+    }
+  }
+
+  @Override
+  public void executeWriteVertex(int vertexName) {
+    OrientGraph g = getGraph();
+    try {
+      Vertex v = g.addVertex("V");
+      v.setProperty("name", vertexName);
+      g.commit();
+    } catch (Exception e) {
+      log.error("Error writing Vertex", e);
+      g.rollback();
+    } finally {
+      g.shutdown();
+    }
+  }
+
+  private OrientGraph getGraph() {
+    try {
+      return ((OrientDbConnection) super.client).getGraphFactory().getTx();
+    } catch (Exception e) {
+      log.error("Couldn't create graphTx", e);
+      return null;
+    }
+  }
 
 }
