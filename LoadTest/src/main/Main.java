@@ -11,8 +11,9 @@ public class Main {
 	public static void main(String[] args) 
 	{
 		//Anzahl der Threads die getestet werden sollen
-		int[] numberOfThreads = {500, 600, 700, 800, 900, 1000};
-		final int THREADS = numberOfThreads[0];
+		//int[] numberOfThreads = {1, 5, 10, 20, 50, 100, 200, 300, 500}; //read
+		int[] numberOfThreads = {10, 50, 100, 200, 300, 400, 500, 750, 1000}; //write
+		final int THREADS = numberOfThreads[8];
 		
 		//Erstelle Datenbank-Objekte
 		TinkerpopDB graphDB = new TinkerpopDB();
@@ -23,9 +24,9 @@ public class Main {
 		LoadTest loadTest = new LoadTest(graphDB);
 		
 		//führe Schreibtest durch
-		//loadTest.performWriteTest(3);
+		loadTest.performWriteTest(THREADS);
 		
 		//führe Lesetest durch
-		loadTest.performReadTest(2);	
+		//loadTest.performReadTest(THREADS);	
 	}
 }

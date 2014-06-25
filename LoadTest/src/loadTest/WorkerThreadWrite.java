@@ -35,15 +35,15 @@ public class WorkerThreadWrite extends WorkerThread
 	 * @return
 	 */
 	public long executeWriteVertex()
-	{
-		//verbinde zur Datenbank
-		this.graphDB.connect();
-		
+	{		
 		//Starte Timer der die Zeit in Millisekunden misst, die für die 
 		//Ausführung der Query benötigt wird. Die Zeit des Verbindungsaufbaus 
 		//wird nicht gemessen!!!
 		Stopwatch timer = new Stopwatch();		
 		timer.start();
+		
+		//verbinde zur Datenbank
+		this.graphDB.connect();		
 		
 		//führe Query aus.
 		this.graphDB.executeWriteVertex(this.vertexName);	

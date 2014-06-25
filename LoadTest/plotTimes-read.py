@@ -7,16 +7,16 @@ Created on Sun May 18 16:41:08 2014
 import matplotlib.pyplot as pyplot
 
 
-THREADS = [10, 50, 100, 200, 300, 400, 500, 750, 1000]
+THREADS = [1, 5, 10, 20, 50, 100]
 
-NEO4J_TIMES = [719, 3366, 4741, 7676, 9645, 10855, 12369, 16778, 23009]
-NEO4J_STANDARD_DEVIATIONS = [21.29, 66.83, 48.58, 63.77, 77.49, 104.00, 116.11, 178.11, 174.55]
+NEO4J_TIMES = [1539, 2582, 4521, 8178, 16014, 0]
+NEO4J_STANDARD_DEVIATIONS = [0.0, 4.42, 11.58, 41.28, 276.9, 0]
 
-TINKERPOP_TIMES = [14517, 15447, 15852, 16282, 16673, 17044, 17389, 18462, 18814]
-TINKERPOP_STANDARD_DEVIATIONS = [1510.05, 440.13, 223.45, 116.94, 90.58, 81.42, 103.43, 105.16, 95.60]
+TINKERPOP_TIMES = [1281, 11019, 12496, 15690, 16968, 17041]
+TINKERPOP_STANDARD_DEVIATIONS = [0, 3435.28, 2291.76, 1063.45, 313.33, 221.58]
 
-ORIENT_DB_TIMES = [90, 80, 70, 60, 50, 40, 0, 0, 0]
-ORIENT_DB_STANDARD_DEVIATIONS = [1, 2, 1, 2, 1, 2, 0, 0, 0]
+ORIENT_DB_TIMES = [90, 80, 70, 60, 50, 40]
+ORIENT_DB_STANDARD_DEVIATIONS = [1, 2, 1, 2, 1, 2]
 
 
 def main():
@@ -32,8 +32,8 @@ def plot_times():
     
     pyplot.xlabel('#Threads')
     pyplot.ylabel('Query time (ms)')
-    pyplot.title('Load Test (writes)')
-    pyplot.legend(loc='upper left', shadow=True)
+    pyplot.title('Reads')
+    pyplot.legend(loc='lower right', shadow=True)
     pyplot.show()
    
 

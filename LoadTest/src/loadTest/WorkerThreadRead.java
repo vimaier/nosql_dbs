@@ -34,15 +34,15 @@ public class WorkerThreadRead extends WorkerThread
 	 * @return
 	 */
 	public long executeReadVertex()
-	{
-		//verbinde zur Datenbank
-		this.graphDB.connect();
-		
+	{		
 		//Starte Timer der die Zeit in Millisekunden misst, die für die 
 		//Ausführung der Query benötigt wird. Die Zeit des Verbindungsaufbaus 
 		//wird nicht gemessen!!!
 		Stopwatch timer = new Stopwatch();		
 		timer.start();
+		
+		//verbinde zur Datenbank
+		this.graphDB.connect();		
 		
 		//führe Query aus.
 		this.graphDB.executeReadVertex(this.vertexName);	

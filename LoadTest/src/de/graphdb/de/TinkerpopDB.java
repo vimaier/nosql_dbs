@@ -2,9 +2,13 @@ package de.graphdb.de;
 
 import java.io.IOException;
 
+import org.apache.commons.configuration.BaseConfiguration;
+
 import com.tinkerpop.rexster.client.RexProException;
 import com.tinkerpop.rexster.client.RexsterClient;
 import com.tinkerpop.rexster.client.RexsterClientFactory;
+import com.tinkerpop.rexster.client.RexsterClientTokens;
+import com.tinkerpop.rexster.protocol.serializer.msgpack.MsgPackSerializer;
 
 public class TinkerpopDB extends GraphDB
 {
@@ -31,8 +35,38 @@ public class TinkerpopDB extends GraphDB
 		//verbinde zur Datenbank und speichere client in this.client
 		try 
 		{
-			this.client = RexsterClientFactory.open(
-					"192.168.93.128", "neo4jsample");
+			BaseConfiguration configuration = new BaseConfiguration() {{
+		        addProperty(RexsterClientTokens
+		        		.CONFIG_HOSTNAME, "10.0.107.174");
+		        addProperty(RexsterClientTokens
+		        		.CONFIG_PORT, 8184);
+		        addProperty(RexsterClientTokens
+		        		.CONFIG_TIMEOUT_CONNECTION_MS, 999999999);
+		        addProperty(RexsterClientTokens
+		        		.CONFIG_TIMEOUT_WRITE_MS, 4000);
+		        addProperty(RexsterClientTokens
+		        		.CONFIG_TIMEOUT_READ_MS, 16000);
+		        addProperty(RexsterClientTokens
+		        		.CONFIG_MAX_ASYNC_WRITE_QUEUE_BYTES, 5120000);
+		        addProperty(RexsterClientTokens
+		        		.CONFIG_MESSAGE_RETRY_COUNT, 16);
+		        addProperty(RexsterClientTokens
+		        		.CONFIG_MESSAGE_RETRY_WAIT_MS, 50);
+		        addProperty(RexsterClientTokens
+		        		.CONFIG_LANGUAGE, "groovy");
+		        addProperty(RexsterClientTokens
+		        		.CONFIG_GRAPH_OBJECT_NAME, "g");
+		        addProperty(RexsterClientTokens
+		        		.CONFIG_GRAPH_NAME, "neo4jsample");
+		        addProperty(RexsterClientTokens
+		        		.CONFIG_TRANSACTION, true);
+		        addProperty(RexsterClientTokens
+		        		.CONFIG_SERIALIZER, MsgPackSerializer.SERIALIZER_ID);
+		    }};
+		    
+		    
+			this.client = RexsterClientFactory.open("10.0.107.174", "neo4jsample");
+		    //this.client = RexsterClientFactory.open(configuration);
 		} 
 		catch (Exception e) 
 		{
